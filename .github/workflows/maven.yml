@@ -19,7 +19,7 @@ jobs:
     env:
       DB_DATABASE: hivedb
       DB_USER: root
-      DB_PASSWORD: ""
+      DB_PASSWORD: root
 
     steps:
     - uses: actions/checkout@v3
