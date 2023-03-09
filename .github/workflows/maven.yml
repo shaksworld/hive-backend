@@ -12,6 +12,13 @@ jobs:
     strategy:
       matrix:
         java-version: [17]
+        
+    env:
+      DB_HOST: localhost
+      DB_PORT: 3306
+      DB_NAME: mydb
+      DB_USERNAME: username
+      DB_PASSWORD: ""
 
     steps:
     - uses: actions/checkout@v3
