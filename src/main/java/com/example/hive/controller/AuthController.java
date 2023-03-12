@@ -33,13 +33,13 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
 
-//    @PostMapping(path = "/register")
-//    public ResponseEntity<AppResponse<?>> registerUser(@RequestBody @Valid final UserRegistrationRequestDto registrationRequestDto) {
-//        log.info("controller register: register user :: [{}] ::", registrationRequestDto.getEmail());
-//        RegistrationResponseDto response = userService.registerUser(registrationRequestDto);
-//        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/auth/register").toUriString());
-//        return ResponseEntity.created(uri).body(AppResponse.buildSuccess(response));
-//    }
+    @PostMapping(path = "/register")
+    public ResponseEntity<AppResponse<?>> registerUser(@RequestBody @Valid final UserRegistrationRequestDto registrationRequestDto) {
+        log.info("controller register: register user :: [{}] ::", registrationRequestDto.getEmail());
+        RegistrationResponseDto response = userService.registerUser(registrationRequestDto);
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/auth/register").toUriString());
+        return ResponseEntity.created(uri).body(AppResponse.buildSuccess(response));
+    }
 
 
 

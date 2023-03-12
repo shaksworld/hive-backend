@@ -6,6 +6,7 @@ import com.example.hive.dto.request.UserRegistrationRequestDto;
 import com.example.hive.entity.Address;
 import com.example.hive.utils.validations.PhoneNumber;
 import com.example.hive.utils.validations.ValidPassword;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -33,7 +34,13 @@ class AuthControllerTest {
     ObjectMapper mapper;
 
     @BeforeEach
-    public void setUpBeforeEach(){
+    public void setUpBeforeEach() throws Exception {
+
+        UserRegistrationRequestDto userRequest = getUserRequest();
+                mockMvc.perform(post("/auth/register")
+                .content(mapper.writeValueAsString(userRequest))
+                .contentType(MediaType.APPLICATION_JSON));
+
 
     }
 
