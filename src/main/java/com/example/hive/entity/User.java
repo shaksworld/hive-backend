@@ -16,7 +16,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@Table(name = "users", uniqueConstraints= @UniqueConstraint(columnNames = "email"))
 public class User extends AuditEntity {
     @Id
 
@@ -25,7 +24,8 @@ public class User extends AuditEntity {
     
     @Column(name = "full_name")
     private String fullName;
-
+    
+    @Column(unique = true)
     private String email;
 
     @Column(name = "phone_number", length = 16)

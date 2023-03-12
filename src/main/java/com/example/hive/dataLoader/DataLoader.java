@@ -10,6 +10,7 @@ import com.example.hive.repository.TaskRepository;
 import com.example.hive.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -26,7 +27,9 @@ public class DataLoader {
         this.addressRepository = addressRepository;
         this.taskRepository = taskRepository;
     }
+
     @PostConstruct
+    @Transactional
     public void loadUserData() {
         // Create an address for the user and task
         Address address = new Address();
