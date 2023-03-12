@@ -16,6 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+@Table(name = "users")
 public class User extends AuditEntity {
     @Id
 
