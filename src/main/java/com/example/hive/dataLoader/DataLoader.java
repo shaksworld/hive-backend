@@ -26,6 +26,7 @@ public class DataLoader {
         this.addressRepository = addressRepository;
         this.taskRepository = taskRepository;
     }
+    @Transactional
     @PostConstruct
     public void loadUserData() {
         // Create an address for the user and task
