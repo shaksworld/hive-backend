@@ -1,4 +1,4 @@
-package com.example.hive.enums;
+package com.example.hive.constant;
 
 public enum Role {
     DOER, TASKER

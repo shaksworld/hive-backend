@@ -1,5 +1,5 @@
 package com.example.hive.entity;
-import com.example.hive.enums.Role;
+import com.example.hive.constant.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
