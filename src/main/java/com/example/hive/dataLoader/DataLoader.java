@@ -141,16 +141,6 @@ public class DataLoader {
         user5.setRole(Role.DOER);
         user5.setAddress(address5);
 
-        User user6 = new User();
-        user6.setUser_id(UUID.randomUUID());
-        user6.setFullName("Desmond");
-        user6.setEmail("desd@gmail.com");
-        user6.setPhoneNumber("4502340000");
-        user6.setValidId(String.valueOf(6));
-        user6.setPassword("hashedDesd");
-        user6.setIsVerified(true);
-        user6.setRole(Role.DOER);
-        user6.setAddress(address6);
 
         // Create a task
         Task task = new Task();
@@ -236,10 +226,6 @@ public class DataLoader {
         task8.setStatus(Status.EXPIRED);
 
 
-        taskRepository.save(task);
-        task.setTasker(user);
-        task.setDoer(user6);
-        taskRepository.save(task);
 
         taskRepository.save(task3);
         task3.setTasker(user3);
