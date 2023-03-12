@@ -7,6 +7,8 @@ import lombok.experimental.SuperBuilder;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+
 
 @Entity
 @Getter
@@ -17,9 +19,10 @@ import java.util.Set;
 @Table(name = "users", uniqueConstraints= @UniqueConstraint(columnNames = "email"))
 public class User extends AuditEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String user_id;
 
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID user_id;
+    
     @Column(name = "full_name")
     private String fullName;
 
@@ -41,7 +44,7 @@ public class User extends AuditEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToMany
+    @OneToMany(targetEntity = Task.class)
     private List<Task> task;
 
     public void addRole(Role role) {

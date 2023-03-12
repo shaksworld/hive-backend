@@ -1,5 +1,6 @@
 package com.example.hive.constant;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
