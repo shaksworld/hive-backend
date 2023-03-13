@@ -9,10 +9,12 @@ import com.example.hive.repository.AddressRepository;
 import com.example.hive.repository.TaskRepository;
 import com.example.hive.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -74,6 +76,8 @@ public class DataLoader {
         address6.setCountry("Nigeria");
 
 
+        addressRepository.saveAll(List.of(address, address2, address3, address4, address5, address6));
+
         addressRepository.save(address);
         addressRepository.save(address2);
         addressRepository.save(address3);
@@ -105,6 +109,7 @@ public class DataLoader {
         user2.setRole(Role.TASKER);
         user2.setAddress(address2);
 
+
         // third user
         User user3 = new User();
         user3.setUser_id(UUID.randomUUID());
@@ -117,6 +122,7 @@ public class DataLoader {
         user3.setRole(Role.TASKER);
         user3.setAddress(address3);
 
+
         User user4 = new User();
         user4.setUser_id(UUID.randomUUID());
         user4.setFullName("Christian Fo0bah");
@@ -127,6 +133,7 @@ public class DataLoader {
         user4.setIsVerified(true);
         user4.setRole(Role.DOER);
         user4.setAddress(address4);
+
 
         User user5 = new User();
         user5.setUser_id(UUID.randomUUID());
@@ -139,6 +146,7 @@ public class DataLoader {
         user5.setRole(Role.DOER);
         user5.setAddress(address5);
 
+
         User user6 = new User();
         user6.setUser_id(UUID.randomUUID());
         user6.setFullName("Desmond");
@@ -149,6 +157,15 @@ public class DataLoader {
         user6.setIsVerified(true);
         user6.setRole(Role.DOER);
         user6.setAddress(address6);
+
+
+        List<User> users = List.of(user,user2,user3,user4,user5,user6);
+
+        for (User u: users){
+            if (userRepository.findByEmail(u.getEmail()).isEmpty()) {
+                userRepository.save(u);
+            }
+        }
 
         // Create a task
         Task task = new Task();
@@ -235,38 +252,35 @@ public class DataLoader {
 
 
         taskRepository.save(task);
-        task.setTasker(user);
-        task.setDoer(user6);
+        User tasker1 = userRepository.findByEmail(user.getEmail()).get();
+        User doer = userRepository.findByEmail(user6.getEmail()).get();
+        task.setTasker(tasker1);
+        task.setDoer(doer);
         taskRepository.save(task);
 
         taskRepository.save(task3);
-        task3.setTasker(user3);
-        task3.setDoer(user5);
+        User tasker2 = userRepository.findByEmail(user3.getEmail()).get();
+        User doer2 = userRepository.findByEmail(user5.getEmail()).get();
+        task3.setTasker(tasker2);
+        task3.setDoer(doer2);
         taskRepository.save(task3);
 
         taskRepository.save(task2);
-//        task2.setTasker(user2);
-        taskRepository.save(task2);
 
         taskRepository.save(task4);
-        task4.setTasker(user2);
-        task4.setDoer(user4);
+        User tasker3 = userRepository.findByEmail(user2.getEmail()).get();
+        User doer3 = userRepository.findByEmail(user4.getEmail()).get();
+        task4.setTasker(tasker3);
+        task4.setDoer(doer3);
         taskRepository.save(task4);
 
         taskRepository.save(task5);
-//        task5.setTasker(user5);
-        taskRepository.save(task5);
+
 
         taskRepository.save(task6);
-//        task2.setTasker(user);
-//        taskRepository.save(task6);
 
         taskRepository.save(task7);
-//        task2.setTasker(user2);
-//        taskRepository.save(task2);
 
         taskRepository.save(task8);
-//        task8.setTasker(user3);
-//        taskRepository.save(task8);
     }
 }
