@@ -76,14 +76,16 @@ public class DataLoader {
         address6.setCountry("Nigeria");
 
 
-        addressRepository.saveAll(List.of(address, address2, address3, address4, address5, address6));
+//        addressRepository.saveAll(List.of(address, address2, address3, address4, address5, address6));
 
-        addressRepository.save(address);
-        addressRepository.save(address2);
-        addressRepository.save(address3);
-        addressRepository.save(address4);
-        addressRepository.save(address5);
-        addressRepository.save(address6);
+        Address saveAddress1 = addressRepository.save(address);
+        Address saveAddress2 = addressRepository.save(address2);
+        Address saveAddress3 = addressRepository.save(address3);
+        Address saveAddress4 = addressRepository.save(address4);
+        Address saveAddress5 = addressRepository.save(address5);
+        Address saveAddress6 = addressRepository.save(address6);
+
+
 
         // Create a user
         User user = new User();
@@ -95,7 +97,7 @@ public class DataLoader {
         user.setPassword("hashedPassword");
         user.setIsVerified(true);
         user.setRole(Role.TASKER);
-        user.setAddress(address);
+        user.setAddress(saveAddress1);
 
         // second user
         User user2 = new User();
@@ -107,7 +109,7 @@ public class DataLoader {
         user2.setPassword("hashedPassword");
         user2.setIsVerified(true);
         user2.setRole(Role.TASKER);
-        user2.setAddress(address2);
+        user2.setAddress(saveAddress2);
 
 
         // third user
@@ -120,7 +122,7 @@ public class DataLoader {
         user3.setPassword("hashedPassword");
         user3.setIsVerified(true);
         user3.setRole(Role.TASKER);
-        user3.setAddress(address3);
+        user3.setAddress(saveAddress3);
 
 
         User user4 = new User();
@@ -132,7 +134,7 @@ public class DataLoader {
         user4.setPassword("0000");
         user4.setIsVerified(true);
         user4.setRole(Role.DOER);
-        user4.setAddress(address4);
+        user4.setAddress(saveAddress4);
 
 
         User user5 = new User();
@@ -144,7 +146,7 @@ public class DataLoader {
         user5.setPassword("hashedPassword");
         user5.setIsVerified(true);
         user5.setRole(Role.DOER);
-        user5.setAddress(address5);
+        user5.setAddress(saveAddress5);
 
 
         User user6 = new User();
@@ -156,7 +158,7 @@ public class DataLoader {
         user6.setPassword("hashedDesd");
         user6.setIsVerified(true);
         user6.setRole(Role.DOER);
-        user6.setAddress(address6);
+        user6.setAddress(saveAddress6);
 
 
         List<User> users = List.of(user,user2,user3,user4,user5,user6);
