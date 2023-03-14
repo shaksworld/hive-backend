@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -14,10 +15,11 @@ import java.util.List;
 @Entity
 public class User extends AuditEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String user_id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID user_id;
     @Column(name = "full_name")
     private String fullName;
+
     @Column(unique = true)
     private String email;
     @Column(name = "phone_number")
@@ -30,6 +32,6 @@ public class User extends AuditEntity {
     private Boolean isVerified;
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToMany
+    @OneToMany(targetEntity = Task.class)
     private List<Task> task;
 }
