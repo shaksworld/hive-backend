@@ -1,4 +1,4 @@
-package com.example.hive.config;
+package com.example.hive.security.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

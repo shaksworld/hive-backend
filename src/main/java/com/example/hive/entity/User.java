@@ -18,6 +18,7 @@ public class User extends AuditEntity {
     private String user_id;
     @Column(name = "full_name")
     private String fullName;
+    @Column(unique = true)
     private String email;
     @Column(name = "phone_number")
     private String phoneNumber;
