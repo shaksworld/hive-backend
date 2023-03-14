@@ -24,8 +24,8 @@ public class HiveUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         log.info("userService loadUserByUserName - email :: [{}] ::", email);
-        log.info("User ==> [{}]", userRepository.getUserByEmail(email));
-        User user = userRepository.getUserByEmail(email)
+        log.info("User ==> [{}]", userRepository.findByEmail(email));
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(
                         () -> {
                             throw new ResourceNotFoundException("user does not exist");
