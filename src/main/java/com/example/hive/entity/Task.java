@@ -1,5 +1,5 @@
 package com.example.hive.entity;
-import com.example.hive.enums.Status;
+import com.example.hive.constant.enums.Status;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -18,8 +18,8 @@ import java.util.UUID;
 @Entity
 public class Task extends AuditEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID task_id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String task_id;
     @Column(name = "job_type")
     private String jobType;
     @Size(max = 250)

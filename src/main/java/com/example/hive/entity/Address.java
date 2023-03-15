@@ -13,8 +13,8 @@ import java.util.UUID;
 @Entity
 public class Address {
    @Id
-   @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID address_id;
+   @GeneratedValue(strategy = GenerationType.UUID)
+    private String address_id;
     private Integer number;
     private String street;
     private String city;

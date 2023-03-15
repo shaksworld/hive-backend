@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 
-public interface TaskRepository extends JpaRepository<Task, UUID> {
+public interface TaskRepository extends JpaRepository<Task, String> {
     Optional<Task> findByTaskDescription(String taskDescription);
 
 }
