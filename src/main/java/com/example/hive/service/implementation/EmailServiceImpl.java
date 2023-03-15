@@ -1,10 +1,8 @@
 package com.example.hive.service.implementation;
 
-import com.example.hive.dto.request.EmailDto;
+import com.example.hive.dto.Request.EmailDto;
 import com.example.hive.exceptions.CustomException;
 import com.example.hive.service.EmailService;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

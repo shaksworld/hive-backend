@@ -1,12 +1,8 @@
-package com.example.hive.dto.response;
+package com.example.hive.dto.Response;
 
 import com.example.hive.entity.Address;
-import com.example.hive.entity.Task;
 import com.example.hive.enums.Role;
-import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.List;
 
 @Builder
 @Getter

@@ -1,4 +1,4 @@
-package com.example.hive.dto.response;
+package com.example.hive.dto.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
