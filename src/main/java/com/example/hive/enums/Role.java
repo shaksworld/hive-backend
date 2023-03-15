@@ -1,4 +1,4 @@
-package com.example.hive.constant.enums;
+package com.example.hive.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

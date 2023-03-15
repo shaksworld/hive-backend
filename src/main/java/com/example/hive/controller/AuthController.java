@@ -1,8 +1,8 @@
 package com.example.hive.controller;
 
-import com.example.hive.dto.Request.UserRegistrationRequestDto;
-import com.example.hive.dto.Response.AppResponse;
-import com.example.hive.dto.Response.RegistrationResponseDto;
+import com.example.hive.dto.request.UserRegistrationRequestDto;
+import com.example.hive.dto.response.AppResponse;
+import com.example.hive.dto.response.UserRegistrationResponseDto;
 import com.example.hive.exceptions.CustomException;
 import com.example.hive.service.UserService.UserService;
 import jakarta.validation.Valid;
@@ -36,7 +36,7 @@ public class AuthController {
     public ResponseEntity<AppResponse<?>> registerUser(@RequestBody @Valid UserRegistrationRequestDto registrationRequestDto) {
         log.info("controller register: register user :: [{}] ::", registrationRequestDto.getEmail());
         validateUserRegistration(registrationRequestDto);
-        RegistrationResponseDto response = userService.registerUser(registrationRequestDto);
+        UserRegistrationResponseDto response = userService.registerUser(registrationRequestDto);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/auth/register").toUriString());
         return ResponseEntity.created(uri).body(AppResponse.buildSuccess(response));
     }

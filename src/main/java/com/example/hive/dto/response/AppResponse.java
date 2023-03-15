@@ -1,6 +1,6 @@
-package com.example.hive.dto.Response;
+package com.example.hive.dto.response;
 
-import com.example.hive.constant.enums.ResponseStatus;
+import com.example.hive.enums.ResponseStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

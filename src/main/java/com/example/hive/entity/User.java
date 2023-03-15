@@ -1,13 +1,11 @@
 package com.example.hive.entity;
-import com.example.hive.constant.enums.Role;
+import com.example.hive.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -17,7 +15,6 @@ import java.util.UUID;
 @Table(name = "users")
 public class User extends AuditEntity {
     @Id
-
     @GeneratedValue(strategy = GenerationType.UUID)
     private String userId;
 
@@ -38,7 +35,7 @@ public class User extends AuditEntity {
 
     private String password;
 
-    private Boolean isVerified;
+    private Boolean isVerified = false;
 
     @Enumerated(EnumType.STRING)
     private Role role;

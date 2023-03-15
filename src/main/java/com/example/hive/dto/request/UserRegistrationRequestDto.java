@@ -1,8 +1,7 @@
-package com.example.hive.dto.Request;
+package com.example.hive.dto.request;
 
 import com.example.hive.entity.Address;
-import com.example.hive.constant.enums.Role;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.example.hive.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

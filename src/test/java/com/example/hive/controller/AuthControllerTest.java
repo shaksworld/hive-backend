@@ -1,8 +1,7 @@
 package com.example.hive.controller;
 
-import com.example.hive.TestContainers;
-import com.example.hive.constant.enums.Role;
-import com.example.hive.dto.Request.UserRegistrationRequestDto;
+import com.example.hive.enums.Role;
+import com.example.hive.dto.request.UserRegistrationRequestDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +13,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext
+//@DirtiesContext
 public class AuthControllerTest {
 
     @Autowired
