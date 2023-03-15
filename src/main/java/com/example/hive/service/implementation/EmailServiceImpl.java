@@ -1,4 +1,4 @@
-package com.example.hive.service.implementations;
+package com.example.hive.service.implementation;
 
 import com.example.hive.dto.request.EmailDto;
 import com.example.hive.exceptions.CustomException;
@@ -26,6 +26,7 @@ public class EmailServiceImpl implements EmailService {
         private final JavaMailSender mailSender;
 
     @Override
+    @Async
     public void sendEmail(EmailDto emailDto) {
         log.info("sending email to {}" , emailDto.getRecipient());
         MimeMessagePreparator mimeMessagePreparator = mimeMessage -> {
@@ -34,6 +35,7 @@ public class EmailServiceImpl implements EmailService {
             mimeMessageHelper.setTo(emailDto.getRecipient());
             mimeMessageHelper.setSubject(emailDto.getSubject());
             mimeMessageHelper.setText(emailDto.getBody(), true);
+
         };
 
         try {
@@ -47,6 +49,7 @@ public class EmailServiceImpl implements EmailService {
             throw new CustomException("Exception occurred when sending mail to " + emailDto.getRecipient(), HttpStatus.EXPECTATION_FAILED);
         }
     }
+
 
 
 

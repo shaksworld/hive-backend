@@ -4,6 +4,7 @@ import com.example.hive.entity.User;
 import com.example.hive.entity.VerificationToken;
 import com.example.hive.repository.VerificationTokenRepository;
 import com.example.hive.service.EmailService;
+import com.example.hive.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
@@ -17,10 +18,11 @@ import java.util.UUID;
 @Component
 public class RegistrationCompleteEventListener implements ApplicationListener<RegistrationCompleteEvent> {
 
-    private final JavaMailSender mailSender;
     private final EmailService emailService;
+    private final UserService userService;
 
-    private final VerificationTokenRepository verificationTokenRepository;
+
+
 
     @Override
     public void onApplicationEvent(RegistrationCompleteEvent event) {
@@ -28,24 +30,15 @@ public class RegistrationCompleteEventListener implements ApplicationListener<Re
 
         try {
             // create and save verification token for user
-            String token = generateVerificationToken(user);
+            String token = userService.generateVerificationToken(user);
             emailService.sendEmail(EmailTemplates.createVerificationEmail(user, token, event.getApplicationUrl()));
-        } catch (IOException e) {
+        } catch (Exception e) {
+            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
 
-    private  String generateVerificationToken(User user) {
-        log.info("inside generateVerificationToken, generating token for {}", user.getEmail());
-        String token = UUID.randomUUID().toString();
-        VerificationToken verificationToken = new VerificationToken();
-        verificationToken.setUser(user);
-        verificationToken.setToken(token);
 
-        log.info("Saving token to database");
-        verificationTokenRepository.save(verificationToken);
-        return token;
-    }
 }
 

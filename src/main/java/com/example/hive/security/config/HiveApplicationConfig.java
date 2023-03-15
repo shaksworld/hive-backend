@@ -1,5 +1,6 @@
 package com.example.hive.security.config;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class HiveApplicationConfig {
 
     private final UserDetailsService userDetailsService;
+
 
     public HiveApplicationConfig(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
@@ -35,5 +37,10 @@ public class HiveApplicationConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
     }
 }

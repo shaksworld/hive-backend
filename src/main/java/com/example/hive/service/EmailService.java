@@ -11,5 +11,4 @@ public interface EmailService {
 
     void sendEmail(EmailDto emailDto) throws IOException;
 
-
 }

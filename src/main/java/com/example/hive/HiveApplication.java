@@ -10,4 +10,7 @@ public class HiveApplication {
 		SpringApplication.run(HiveApplication.class, args);
 	}
 
+
+
+
 }

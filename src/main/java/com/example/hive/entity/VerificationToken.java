@@ -16,40 +16,41 @@ import java.util.Objects;
     @Entity
     @Table(name = "verification_tokens")
     public class VerificationToken {
-        private static final int EXPIRATION = 60 * 24;
+        private static final int EXPIRATION_TIME = 10;
 
         @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;
 
         private String token;
+        private Date expirationTime;
 
-        private Boolean isUsed = false;
-
-        @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
-        @JoinColumn(nullable = false, name = "user_id")
+        @OneToOne(fetch = FetchType.EAGER)
+        @JoinColumn(
+                name = "users_id",
+                updatable = false,
+                foreignKey = @ForeignKey(name= "FK_USER_VERIFY_TOKEN")
+        )
         private User user;
 
-        private Date expiration;
-
-        private Date calculateExpiryDate(int expiryTimeInMinutes) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(new Timestamp(cal.getTime().getTime()));
-            cal.add(Calendar.MINUTE, expiryTimeInMinutes);
-            return new Date(cal.getTime().getTime());
+        public VerificationToken(String token) {
+            super();
+            this.token = token;
+            this.expirationTime = calculateExpirationDate(EXPIRATION_TIME);
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-            VerificationToken that = (VerificationToken) o;
-            return id != null && Objects.equals(id, that.id);
+        public VerificationToken(String token, User user) {
+            super();
+            this.token = token;
+            this.user = user;
+            this.expirationTime = calculateExpirationDate(EXPIRATION_TIME);
         }
 
-        @Override
-        public int hashCode() {
-            return getClass().hashCode();
+        private Date calculateExpirationDate(int expirationTime) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(new Date().getTime());
+            calendar.add(Calendar.MINUTE, expirationTime);
+            return new Date(calendar.getTime().getTime());
         }
     }
 
