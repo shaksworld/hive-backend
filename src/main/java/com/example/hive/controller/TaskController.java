@@ -19,13 +19,13 @@ public class TaskController {
     public TaskController(TaskService taskService) {
         this.taskService = taskService;
     }
-    @PostMapping("/createTask")
+    @PostMapping("/")
     public ResponseEntity<ApiResponse<TaskDto>> createTask(@Valid @RequestBody TaskDto taskDto) {
         ApiResponse<TaskDto> createdTask = taskService.createTask(taskDto);
         return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
     }
 
-    @PutMapping("/acceptedTask/{taskId}")
+    @PutMapping("/{taskId}")
     public ApiResponse<TaskDto> updateTask(
             @PathVariable UUID taskId,
             @RequestBody TaskDto taskDto) {
