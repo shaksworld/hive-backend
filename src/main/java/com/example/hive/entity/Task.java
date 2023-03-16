@@ -1,5 +1,5 @@
 package com.example.hive.entity;
-import com.example.hive.constant.Status;
+import com.example.hive.enums.Status;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

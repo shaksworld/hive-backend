@@ -1,4 +1,4 @@
-package com.example.hive.dto.response;
+package com.example.hive.dto.Response;
 
 import com.example.hive.constant.ResponseStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;

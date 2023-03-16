@@ -41,8 +41,6 @@ public class UserServiceImpl implements UserService {
 
     private final VerificationTokenRepository verificationTokenRepository;
 
-
-
     private final ModelMapper modelMapper;
 
     private final String verificationUrl = "http://localhost:9090/auth";
