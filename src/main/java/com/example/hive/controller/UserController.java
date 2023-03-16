@@ -6,10 +6,15 @@ import com.example.hive.dto.response.AppResponse;
 import com.example.hive.entity.User;
 import com.example.hive.service.implementation.PasswordServiceImpl;
 import com.example.hive.service.implementation.UserServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -31,6 +36,10 @@ public class UserController {
 
 
     @PostMapping("/forget_password")
+    @Operation(summary = "Forget password", responses = {
+            @ApiResponse(responseCode = "200",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponse.class)))})
     public ResponseEntity<AppResponse<?>> forgetPassword(@RequestBody ForgetPasswordDto passwordDto,
                                                          HttpServletRequest request) throws UnsupportedEncodingException, MessagingException {
         Optional<User> user = userService.findUserByEmail(passwordDto.getEmail());
@@ -47,6 +56,10 @@ public class UserController {
     }
 
     @PostMapping("/reset_Password")
+    @Operation(summary = "Reset password", responses = {
+            @ApiResponse(responseCode = "200",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponse.class)))})
     public ResponseEntity<AppResponse<?>> resetPassword(@RequestParam("token") String token, @RequestBody ResetPasswordDto passwordDto) {
         String result = passwordService.validatePasswordResetToken(token);
 
