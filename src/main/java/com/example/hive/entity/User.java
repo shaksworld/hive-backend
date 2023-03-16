@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -29,12 +31,21 @@ public class User extends AuditEntity {
     @OneToOne
     private Address address;
     private String password;
-    private Boolean isVerified;
+    private Boolean isVerified = false;
+
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToMany(targetEntity = Task.class, fetch = FetchType.EAGER)
+    @OneToMany(targetEntity = Task.class)
     private List<Task> task;
 
-    public User(UUID taskerId, String johnDoe, Role tasker) {
+
+
+    public void addRole(Role role) {
+        this.role.getRole();
     }
+
+    public Set<Role> getRoles() {
+        return Collections.singleton(role);
+    }
+
 }
