@@ -1,6 +1,8 @@
 package com.example.hive.entity;
-import com.example.hive.enums.Status;
+import com.example.hive.constant.Status;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -18,6 +20,7 @@ import java.util.UUID;
 @Entity
 public class Task extends AuditEntity {
     @Id
+
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID task_id;
     @Column(name = "job_type")
@@ -37,10 +40,13 @@ public class Task extends AuditEntity {
     @Column(name = "task_duration(hrs)")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private LocalDateTime taskDuration;
+
     @Enumerated(EnumType.STRING)
     private Status status;
-    @ManyToOne(cascade = CascadeType.PERSIST)
+
+
+    @ManyToOne(cascade = CascadeType.MERGE)
     private User tasker;
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.MERGE)
     private User doer;
 }

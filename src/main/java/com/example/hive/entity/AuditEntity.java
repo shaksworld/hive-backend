@@ -1,17 +1,29 @@
 package com.example.hive.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-@Data
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuditEntity implements Serializable {
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+@SuperBuilder
+@DynamicUpdate
+@Setter
+@Getter
+@MappedSuperclass
+public abstract class AuditEntity implements Serializable {
+
+    @Column(name = "created_date")
+    private Timestamp createdDate;
+
+    @Column(name = "updated_date")
+    private Timestamp updatedDate;
 
 }
