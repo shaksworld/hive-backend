@@ -1,8 +1,15 @@
 package com.example.hive.service.implementation;
 
+<<<<<<< HEAD
 
 import com.example.hive.dto.request.UserRegistrationRequestDto;
 import com.example.hive.dto.response.UserRegistrationResponseDto;
+import com.example.hive.entity.User;
+import com.example.hive.repository.PasswordResetTokenRepository;
+import com.example.hive.repository.UserRepository;
+import com.example.hive.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import com.example.hive.entity.Address;
 import com.example.hive.entity.User;
 import com.example.hive.entity.VerificationToken;
@@ -22,7 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.util.Optional;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
@@ -40,11 +47,25 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     private final VerificationTokenRepository verificationTokenRepository;
-
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final ModelMapper modelMapper;
 
     private final String verificationUrl = "http://localhost:9090/auth";
 
+
+
+    @Override
+    public Optional<User> findUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+
+    @Override
+    public Optional<User> getUserByPasswordResetToken(String token) {
+
+        return Optional.ofNullable(passwordResetTokenRepository.findByToken(token).get().getUser());
+
+    }
 
     @Override
     @Transactional
@@ -138,5 +159,3 @@ public class UserServiceImpl implements UserService {
     }
 
 }
-
-
