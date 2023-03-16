@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,6 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Table(name = "tasks")
 @Entity
+@Builder
 public class Task extends AuditEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -39,8 +41,8 @@ public class Task extends AuditEntity {
     private LocalDateTime taskDuration;
     @Enumerated(EnumType.STRING)
     private Status status;
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.MERGE)
     private User tasker;
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.MERGE)
     private User doer;
 }

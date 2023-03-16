@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -31,12 +32,12 @@ public class DataLoader {
     @PostConstruct
     public void loadUserData() {
         // Create an address for the user and task
-        Address address = new Address();
-        address.setNumber(1);
-        address.setStreet("Lagos Street");
-        address.setCity("Lagos");
-        address.setState("Lagos");
-        address.setCountry("Nigeria");
+        Address address1 = new Address();
+        address1.setNumber(1);
+        address1.setStreet("Lagos Street");
+        address1.setCity("Lagos");
+        address1.setState("Lagos");
+        address1.setCountry("Nigeria");
 
         // second address
         Address address2 = new Address();
@@ -76,15 +77,20 @@ public class DataLoader {
         address6.setCountry("Nigeria");
 
 
-//        addressRepository.saveAll(List.of(address, address2, address3, address4, address5, address6));
+        List<Address> addresses = List.of(address1, address2, address3, address4, address5, address6);
 
-        Address saveAddress1 = addressRepository.save(address);
-        Address saveAddress2 = addressRepository.save(address2);
-        Address saveAddress3 = addressRepository.save(address3);
-        Address saveAddress4 = addressRepository.save(address4);
-        Address saveAddress5 = addressRepository.save(address5);
-        Address saveAddress6 = addressRepository.save(address6);
-
+        for (Address address : addresses) {
+            Optional<Address> existingAddress = addressRepository.findByNumberAndStreetAndCityAndStateAndCountry(
+                    address.getNumber(),
+                    address.getStreet(),
+                    address.getCity(),
+                    address.getState(),
+                    address.getCountry()
+            );
+            if (!existingAddress.isPresent()) {
+                addressRepository.save(address);
+            }
+        }
 
 
         // Create a user
@@ -97,7 +103,7 @@ public class DataLoader {
         user.setPassword("hashedPassword");
         user.setIsVerified(true);
         user.setRole(Role.TASKER);
-        user.setAddress(saveAddress1);
+        user.setAddress(address1);
 
         // second user
         User user2 = new User();
@@ -109,7 +115,7 @@ public class DataLoader {
         user2.setPassword("hashedPassword");
         user2.setIsVerified(true);
         user2.setRole(Role.TASKER);
-        user2.setAddress(saveAddress2);
+        user2.setAddress(address2);
 
 
         // third user
@@ -122,7 +128,7 @@ public class DataLoader {
         user3.setPassword("hashedPassword");
         user3.setIsVerified(true);
         user3.setRole(Role.TASKER);
-        user3.setAddress(saveAddress3);
+        user3.setAddress(address3);
 
 
         User user4 = new User();
@@ -134,8 +140,7 @@ public class DataLoader {
         user4.setPassword("0000");
         user4.setIsVerified(true);
         user4.setRole(Role.DOER);
-        user4.setAddress(saveAddress4);
-
+        user4.setAddress(address4);
 
         User user5 = new User();
         user5.setUser_id(UUID.randomUUID());
@@ -146,7 +151,7 @@ public class DataLoader {
         user5.setPassword("hashedPassword");
         user5.setIsVerified(true);
         user5.setRole(Role.DOER);
-        user5.setAddress(saveAddress5);
+        user5.setAddress(address5);
 
 
         User user6 = new User();
@@ -158,7 +163,7 @@ public class DataLoader {
         user6.setPassword("hashedDesd");
         user6.setIsVerified(true);
         user6.setRole(Role.DOER);
-        user6.setAddress(saveAddress6);
+        user6.setAddress(address6);
 
 
         List<User> users = List.of(user,user2,user3,user4,user5,user6);
@@ -170,15 +175,15 @@ public class DataLoader {
         }
 
         // Create a task
-        Task task = new Task();
-        task.setJobType("Painting");
-        task.setTaskDescription("Paint the mansion");
-        task.setBudgetRate(new BigDecimal("10000"));
-        task.setTaskAddress("123 Obafemi Awolowo Street, India");
-        task.setTaskDeliveryAddress("123 Obafemi Awolowo Street, India");
-        task.setEstimatedTime(5);
-        task.setTaskDuration(LocalDateTime.now());
-        task.setStatus(Status.NEW);
+        Task task1 = new Task();
+        task1.setJobType("Painting");
+        task1.setTaskDescription("Paint the mansion");
+        task1.setBudgetRate(new BigDecimal("10000"));
+        task1.setTaskAddress("123 Obafemi Awolowo Street, India");
+        task1.setTaskDeliveryAddress("123 Obafemi Awolowo Street, India");
+        task1.setEstimatedTime(5);
+        task1.setTaskDuration(LocalDateTime.now());
+        task1.setStatus(Status.NEW);
 
         // Second task
         Task task2 = new Task();
@@ -220,7 +225,7 @@ public class DataLoader {
         task5.setTaskDeliveryAddress("MexicNo 2 Lekki Phase 1 o");
         task5.setEstimatedTime(3);
         task5.setTaskDuration(LocalDateTime.now());
-        task5.setStatus(Status.ACCEPTED);
+        task5.setStatus(Status.NEW);
 
         Task task6 = new Task();
         task6.setJobType("Logistics");
@@ -230,7 +235,7 @@ public class DataLoader {
         task6.setTaskDeliveryAddress("Victoria Island, Lagos");
         task6.setEstimatedTime(2);
         task6.setTaskDuration(LocalDateTime.now());
-        task6.setStatus(Status.ACCEPTED);
+        task6.setStatus(Status.NEW);
 
         Task task7 = new Task();
         task7.setJobType("Pick-up");
@@ -250,39 +255,43 @@ public class DataLoader {
         task8.setTaskDeliveryAddress("9 Peace Estate, Ajah.");
         task8.setEstimatedTime(2);
         task8.setTaskDuration(LocalDateTime.now());
-        task8.setStatus(Status.EXPIRED);
+        task8.setStatus(Status.NEW);
 
 
-        taskRepository.save(task);
         User tasker1 = userRepository.findByEmail(user.getEmail()).get();
         User doer = userRepository.findByEmail(user6.getEmail()).get();
-        task.setTasker(tasker1);
-        task.setDoer(doer);
-        taskRepository.save(task);
+        task1.setTasker(tasker1);
+        task1.setDoer(doer);
 
-        taskRepository.save(task3);
         User tasker2 = userRepository.findByEmail(user3.getEmail()).get();
         User doer2 = userRepository.findByEmail(user5.getEmail()).get();
         task3.setTasker(tasker2);
         task3.setDoer(doer2);
-        taskRepository.save(task3);
 
-        taskRepository.save(task2);
-
-        taskRepository.save(task4);
         User tasker3 = userRepository.findByEmail(user2.getEmail()).get();
         User doer3 = userRepository.findByEmail(user4.getEmail()).get();
         task4.setTasker(tasker3);
         task4.setDoer(doer3);
-        taskRepository.save(task4);
 
-        taskRepository.save(task5);
+        List<Task> tasks = List.of(task1, task2, task3, task4, task5, task6, task7, task8);
 
+        for (Task task : tasks) {
+            Optional<Task> existingTask = taskRepository.findByJobTypeAndTaskDescriptionAndBudgetRateAndTaskAddressAndTaskDeliveryAddressAndEstimatedTimeAndStatus(
+                    task.getJobType(),
+                    task.getTaskDescription(),
+                    task.getBudgetRate(),
+                    task.getTaskAddress(),
+                    task.getTaskDeliveryAddress(),
+                    task.getEstimatedTime(),
+                    task.getStatus()
+            );
+            if (!existingTask.isPresent()) {
+                taskRepository.save(task);
+            } else {
+                System.err.println("Error: Task has duplicate: " + task);
+            }
 
-        taskRepository.save(task6);
+        }
 
-        taskRepository.save(task7);
-
-        taskRepository.save(task8);
     }
 }
