@@ -1,7 +1,7 @@
 package com.example.hive.utils;
 
-import com.example.hive.dto.Request.EmailDto;
-import com.example.hive.dto.Request.UserRegistrationRequestDto;
+import com.example.hive.dto.request.EmailDto;
+import com.example.hive.dto.request.UserRegistrationRequestDto;
 import com.example.hive.entity.Address;
 import com.example.hive.entity.User;
 import com.example.hive.enums.Role;

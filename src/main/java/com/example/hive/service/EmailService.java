@@ -2,7 +2,7 @@ package com.example.hive.service;
 
 
 
-import com.example.hive.dto.Request.EmailDto;
+import com.example.hive.dto.request.EmailDto;
 
 import java.io.IOException;
 

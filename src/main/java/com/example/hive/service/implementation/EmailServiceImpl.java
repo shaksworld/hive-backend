@@ -1,6 +1,6 @@
 package com.example.hive.service.implementation;
 
-import com.example.hive.dto.Request.EmailDto;
+import com.example.hive.dto.request.EmailDto;
 import com.example.hive.exceptions.CustomException;
 import com.example.hive.service.EmailService;
 import lombok.RequiredArgsConstructor;
