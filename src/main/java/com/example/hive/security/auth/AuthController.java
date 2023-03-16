@@ -1,8 +1,8 @@
 package com.example.hive.security.auth;
 
-import com.example.hive.dto.Request.UserRegistrationRequestDto;
-import com.example.hive.dto.Response.AppResponse;
-import com.example.hive.dto.Response.UserRegistrationResponseDto;
+import com.example.hive.dto.request.UserRegistrationRequestDto;
+import com.example.hive.dto.response.AppResponse;
+import com.example.hive.dto.response.UserRegistrationResponseDto;
 import com.example.hive.entity.User;
 import com.example.hive.entity.VerificationToken;
 import com.example.hive.exceptions.CustomException;
