@@ -1,6 +1,5 @@
 package com.example.hive.service.implementation;
 
-<<<<<<< HEAD
 
 import com.example.hive.dto.request.UserRegistrationRequestDto;
 import com.example.hive.dto.response.UserRegistrationResponseDto;
@@ -100,7 +99,7 @@ public class UserServiceImpl implements UserService {
 
 
     private boolean doesUserAlreadyExist(String email) {
-        return userRepository.getUserByEmail(email).isPresent();
+        return userRepository.findByEmail(email).isPresent();
     }
 
     @Override
