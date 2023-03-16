@@ -1,4 +1,4 @@
-package com.example.hive.dto.Request;
+package com.example.hive.dto.request;
 
 import com.example.hive.entity.Address;
 import com.example.hive.enums.Role;
