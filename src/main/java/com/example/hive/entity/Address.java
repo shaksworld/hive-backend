@@ -19,11 +19,8 @@ public class Address {
     private String street;
     private String city;
     private String state;
-    private String Country;
+    private String country;
     @OneToOne
     private User user;
-//    @OneToOne(mappedBy = "taskAddress")
-//    private Task task;
-//    @OneToOne
-//    private Task task;
+
 }
