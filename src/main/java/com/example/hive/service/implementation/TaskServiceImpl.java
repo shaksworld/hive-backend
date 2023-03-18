@@ -2,6 +2,7 @@ package com.example.hive.service.implementation;
 
 import com.example.hive.dto.request.TaskDto;
 import com.example.hive.dto.response.ApiResponse;
+import com.example.hive.dto.response.TaskResponseDto;
 import com.example.hive.entity.Task;
 import com.example.hive.entity.User;
 import com.example.hive.enums.Role;
@@ -13,7 +14,11 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Log4j2
 @Service
@@ -52,7 +57,8 @@ public class TaskServiceImpl implements TaskService {
 
         Task savedTask = taskRepository.save(task);
 
-        return new ApiResponse<>(HttpStatus.CREATED, "Task created successfully", savedTask);
+
+        return new ApiResponse<>(HttpStatus.CREATED, "Task created successfully", mapToDto(savedTask));
     }
 
     @Override
@@ -76,7 +82,43 @@ public class TaskServiceImpl implements TaskService {
 
         Task updatedTask = taskRepository.save(task);
 
-        return new ApiResponse<>(HttpStatus.OK, "Task updated successfully", updatedTask);
+        return new ApiResponse<>(HttpStatus.OK, "Task updated successfully", mapToDto(updatedTask));
+    }
+
+    @Override
+    public List<TaskResponseDto> findAll(int pageNo,int pageSize,String sortBy,String sortDir) {
+        List<Task> tasks = taskRepository.findAll();
+        List<TaskResponseDto> taskList =  new ArrayList<>();
+        for (Task task: tasks){
+            taskList.add(mapToDto(task));
+        }
+
+
+        return taskList;
+    }
+
+    @Override
+    public TaskResponseDto findTaskById(UUID taskId) {
+       Optional<Task> task = taskRepository.findById(taskId);
+       if (task.isPresent()){
+           Task task1 = task.get();
+           return mapToDto(task1);
+       }
+
+        return null;
+    }
+    public TaskResponseDto mapToDto(Task task) {
+
+        return TaskResponseDto.builder()
+                .jobType(task.getJobType())
+                .taskDescription(task.getTaskDescription())
+                .taskAddress(task.getTaskAddress())
+                .taskDeliveryAddress(task.getTaskDeliveryAddress())
+                .taskDuration(task.getTaskDuration())
+                .budgetRate(task.getBudgetRate())
+                .estimatedTime(task.getEstimatedTime())
+                .status(task.getStatus())
+                .build();
     }
 }
 
