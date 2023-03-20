@@ -13,17 +13,22 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class HiveSecurityConfig {
+    private final LogoutHandler logoutHandler;
+    private final LogoutSuccessHandler logoutSuccessHandler;
     private final JwtAuthTokenFilter authenticationFilter;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationProvider authenticationProvider;
@@ -32,6 +37,8 @@ public class HiveSecurityConfig {
     //Authorization
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+
         //when X-frame option is disabled it increases the risk of clickjacking
         return http.headers().frameOptions().disable().and()
                 .csrf().disable()
@@ -41,6 +48,10 @@ public class HiveSecurityConfig {
                         "/login",
                         "/h2-console/**",
                         "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/actuator/**",
+                        "/swagger-resources/**",
+                        "/swagger-ui.html",
                         "/webjars/**"
                 ).permitAll()
                 .and()
@@ -49,6 +60,16 @@ public class HiveSecurityConfig {
                 .and()
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .logout()
+                .logoutUrl("/logout")
+                .clearAuthentication(true)
+                .addLogoutHandler(logoutHandler)
+                .logoutSuccessHandler(((request, response, authentication) ->
+                        SecurityContextHolder.clearContext()))
+                .invalidateHttpSession(true)
+                .deleteCookies("JESSIONID")
+                .logoutSuccessUrl("/login")
+                .and()
                 .build();
     }
 
