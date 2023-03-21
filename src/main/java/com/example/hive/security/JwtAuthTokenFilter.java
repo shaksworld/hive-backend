@@ -31,9 +31,11 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
             String authorizationHeader = request.getHeader(AUTHORIZATION);
             if (authorizationHeader != null && authorizationHeader.startsWith(SecurityConstants.TOKEN_PREFIX)) {
                 try {
+                    log.info("I want to verify {}", authorizationHeader);
                     String token = authorizationHeader.substring(SecurityConstants.TOKEN_PREFIX.length());
                     UsernamePasswordAuthenticationToken authenticationToken = JwtService.verifyToken(token);
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                    log.info("I have verified {}", authenticationToken.getAuthorities().toString());
                     filterChain.doFilter(request, response);
                 } catch (Exception exception) {
                     exception.printStackTrace();
@@ -44,6 +46,7 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
                 }
 
             } else {
+                log.info("I am in the JWT filter,,");
                 filterChain.doFilter(request, response);
             }
         }

@@ -58,7 +58,7 @@ public class PasswordServiceImpl implements PasswordService {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
 
-        helper.setFrom("contact@hive.com", "Hive Support");
+        helper.setFrom("hive@blessingchuks.tech", "Hive Support");
         helper.setTo(recipientEmail);
 
         String subject = "Here's the link to reset your password";
