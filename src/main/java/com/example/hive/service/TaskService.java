@@ -16,4 +16,6 @@ public interface TaskService {
 
     TaskResponseDto findTaskById(UUID TaskId);
 
+    List<TaskResponseDto> searchTasks(String text);
+
 }
