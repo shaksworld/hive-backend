@@ -25,8 +25,8 @@ public class TaskDto {
     private String taskAddress;
     private String taskDeliveryAddress;
     private Integer estimatedTime;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime taskDuration;
+//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private String taskDuration;
     private Status status;
     private String tasker_id;
     private String doer_id;

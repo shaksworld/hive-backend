@@ -20,7 +20,7 @@ public class AppResponse<T> {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String statusCode;
     private Boolean isSuccessful;
-    private final LocalDateTime time = LocalDateTime.now();
+    private final String time = LocalDateTime.now().toString();
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private T result;
 

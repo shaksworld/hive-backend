@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class UserRegistrationRequestDto {
 
     @NotBlank(message = "name cannot be empty")
-    @Pattern(regexp = "[a-zA-Z]*", message = "name can only have letters")
+//    @Pattern(regexp = "[a-zA-Z]*", message = "name can only have letters")
     @Size(message = "fullName character length cannot be less than 2 and more than 100", min = 2, max = 200)
     private String fullName;
 

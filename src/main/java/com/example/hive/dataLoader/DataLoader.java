@@ -287,8 +287,6 @@ public class DataLoader {
             );
             if (!existingTask.isPresent()) {
                 taskRepository.save(task);
-            } else {
-                System.err.println("Error: Task has duplicate: " + task);
             }
 
         }
