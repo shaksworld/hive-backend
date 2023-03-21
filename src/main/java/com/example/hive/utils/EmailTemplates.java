@@ -37,6 +37,18 @@ public class EmailTemplates {
 
     }
 
+    public static EmailDto createPaymentVerificationCodeMail(User recipient, String reference) {
+
+        String mailContent = "<p> Dear \"" + recipient.getFullName() +  "\", your Verification code is \"" + reference + "\"</p>";
+
+        return EmailDto.builder()
+                .sender(senderCredential)
+                .subject("Payment Verification Code")
+                .body(mailContent)
+                .recipient(recipient.getEmail())
+                .build();
+    }
+
     public static void main(String[] args) throws JsonProcessingException {
         Address address = new Address();
         address.setNumber(1);
