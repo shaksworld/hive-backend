@@ -7,11 +7,13 @@ import com.example.hive.dto.response.TaskResponseDto;
 import com.example.hive.entity.Task;
 import com.example.hive.entity.User;
 import com.example.hive.enums.Role;
+import com.example.hive.exceptions.ResourceNotFoundException;
 import com.example.hive.repository.TaskRepository;
 import com.example.hive.repository.UserRepository;
 import com.example.hive.service.TaskService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,7 @@ import java.util.stream.Collectors;
 public class TaskServiceImpl implements TaskService {
     private TaskRepository taskRepository;
     private UserRepository userRepository;
+    private final ModelMapper modelMapper;
 
     @Override
     public AppResponse<TaskResponseDto> createTask(TaskDto taskDto) {
@@ -36,7 +39,7 @@ public class TaskServiceImpl implements TaskService {
 
         String tasker1 = taskDto.getTasker_id();
         log.info("about creating task for: " + tasker1);
-        UUID tasker = UUID. fromString(tasker1);
+        UUID tasker = UUID.fromString(tasker1);
 
         User user = userRepository.findById(tasker)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -66,7 +69,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto) {
         // Check if the user has the DOER role
-        UUID doerId = UUID. fromString(taskDto.getDoer_id());
+        UUID doerId = UUID.fromString(taskDto.getDoer_id());
 
         User doer = userRepository.findById(doerId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -84,14 +87,14 @@ public class TaskServiceImpl implements TaskService {
 
         Task updatedTask = taskRepository.save(task);
 
-        return  AppResponse.buildSuccess(mapToDto(updatedTask));
+        return AppResponse.buildSuccess(mapToDto(updatedTask));
     }
 
     @Override
-    public List<TaskResponseDto> findAll(int pageNo,int pageSize,String sortBy,String sortDir) {
+    public List<TaskResponseDto> findAll(int pageNo, int pageSize, String sortBy, String sortDir) {
         List<Task> tasks = taskRepository.findAll();
-        List<TaskResponseDto> taskList =  new ArrayList<>();
-        for (Task task: tasks){
+        List<TaskResponseDto> taskList = new ArrayList<>();
+        for (Task task : tasks) {
             taskList.add(mapToDto(task));
         }
 
@@ -101,14 +104,30 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskResponseDto findTaskById(UUID taskId) {
-       Optional<Task> task = taskRepository.findById(taskId);
-       if (task.isPresent()){
-           Task task1 = task.get();
-           return mapToDto(task1);
-       }
+        Optional<Task> task = taskRepository.findById(taskId);
+        if (task.isPresent()) {
+            Task task1 = task.get();
+            return mapToDto(task1);
+        }
 
         return null;
     }
+
+    @Override
+    public List<TaskResponseDto> getUserCompletedTasks(User currentUser) {
+        log.info("fetching doer with id {} completed task ", currentUser.getUser_id());
+        List<Task> doerTasks = taskRepository.findCompletedTasksByDoer(currentUser);
+        return doerTasks.stream().map(task -> modelMapper.map(task, TaskResponseDto.class)).collect(Collectors.toList());
+
+    }
+
+    @Override
+    public List<TaskResponseDto> getUserOngoingTasks(User currentUser) {
+        log.info("fetching doer with id {} ongoing task task ", currentUser.getUser_id());
+        List<Task> doerTasks = taskRepository.findOngoingTasksByDoer(currentUser);
+        return doerTasks.stream().map(task -> modelMapper.map(task, TaskResponseDto.class)).collect(Collectors.toList());
+    }
+
     public TaskResponseDto mapToDto(Task task) {
 
         return TaskResponseDto.builder()
@@ -119,10 +138,13 @@ public class TaskServiceImpl implements TaskService {
                 .taskDuration(task.getTaskDuration().toString())
                 .budgetRate(task.getBudgetRate())
                 .tasker_id(task.getTask_id().toString())
+//                .doer_id(task.getDoer().getUser_id().toString())
                 .estimatedTime(task.getEstimatedTime())
                 .status(task.getStatus())
                 .build();
     }
+
+
 }
 
 

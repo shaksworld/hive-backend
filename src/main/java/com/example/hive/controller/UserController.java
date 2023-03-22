@@ -39,7 +39,7 @@ public class UserController {
     @Operation(summary = "Forget password", responses = {
             @ApiResponse(responseCode = "200",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ApiResponse.class)))})
+                            schema = @Schema(implementation = AppResponse.class)))})
     public ResponseEntity<AppResponse<?>> forgetPassword(@RequestBody ForgetPasswordDto passwordDto,
                                                          HttpServletRequest request) throws UnsupportedEncodingException, MessagingException {
         Optional<User> user = userService.findUserByEmail(passwordDto.getEmail());
@@ -59,7 +59,7 @@ public class UserController {
     @Operation(summary = "Reset password", responses = {
             @ApiResponse(responseCode = "200",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ApiResponse.class)))})
+                            schema = @Schema(implementation = AppResponse.class)))})
     public ResponseEntity<AppResponse<?>> resetPassword(@RequestParam("token") String token, @RequestBody ResetPasswordDto passwordDto) {
         String result = passwordService.validatePasswordResetToken(token);
 
