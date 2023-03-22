@@ -97,10 +97,10 @@ public class PasswordServiceImpl implements PasswordService {
 
     @Override
     public void changePassword(User user, ResetPasswordDto passwordDto) {
-        if (passwordDto.getNewPassword().equals(passwordEncoder.encode(passwordDto.getConfirmPassword()))) {
-            user.setPassword((passwordDto.getNewPassword()));
+        if (passwordDto.getNewPassword().equals((passwordDto.getConfirmPassword()))) {
+            user.setPassword((passwordEncoder.encode(passwordDto.getNewPassword())));
             userRepository.save(user);
         }
-        throw new CustomException("Password does not match");
+       else { throw new CustomException("Password does not match");}
     }
 }
