@@ -122,14 +122,16 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskResponseDto> searchTasks(String text) {
-        List<Task> tasksList = taskRepository.searchTasksBy(text);
+    public List<TaskResponseDto> searchTasksBy(String text) {
+       List<Task> tasksList = taskRepository.searchTasksBy(text);
         List<TaskResponseDto> listOfTasks = new ArrayList<>();
-        for (Task task: tasksList
-        ) {
-            listOfTasks.add(mapToDto(task));
-        }
+
+            for (Task task : tasksList) {
+                listOfTasks.add(mapToDto(task));
+            }
+
         return listOfTasks;
+
     }
 }
 

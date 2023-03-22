@@ -47,7 +47,7 @@ public class TaskController {
         apiResponse.setStatusCode(HttpStatus.FOUND); // a status code indicating success
         apiResponse.setMessage("Task fetched successfully"); // a message describing the response
 
-        // returns an HTTP response with a JSON payload containing the ApiResponse object
+        // returns an HTTP response with a JSON response containing the ApiResponse object
         return ResponseEntity.ok().body(apiResponse);
     }
 
@@ -64,8 +64,8 @@ public class TaskController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<TaskResponseDto>> searchTasks(@RequestParam("text") String text) {
-        return ResponseEntity.ok(taskService.searchTasks(text));
+    public ResponseEntity<List<TaskResponseDto>> searchTasks(@RequestParam(value = "text", required = true) String text) {
+        return ResponseEntity.ok(taskService.searchTasksBy(text));
     }
 }
 

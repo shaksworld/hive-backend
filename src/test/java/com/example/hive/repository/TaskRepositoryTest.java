@@ -64,4 +64,7 @@ class TaskRepositoryTest {
     }
 
 
+    @Test
+    void searchTasksBy() {
+    }
 }
