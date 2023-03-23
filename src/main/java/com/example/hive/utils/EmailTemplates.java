@@ -33,4 +33,16 @@ public class EmailTemplates {
 
     }
 
+    public static EmailDto createPaymentVerificationCodeMail(User recipient, String reference) {
+
+        String mailContent = "<p> Dear \"" + recipient.getFullName() +  "\", your Verification code is \"" + reference + "\"</p>";
+
+        return EmailDto.builder()
+                .sender(senderCredential)
+                .subject("Payment Verification Code")
+                .body(mailContent)
+                .recipient(recipient.getEmail())
+                .build();
+    }
+
 }
