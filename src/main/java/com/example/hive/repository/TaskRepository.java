@@ -2,6 +2,7 @@ package com.example.hive.repository;
 import com.example.hive.entity.Task;
 import com.example.hive.enums.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
