@@ -2,6 +2,7 @@ package com.example.hive.service.implementation;
 
 import com.example.hive.dto.request.TaskDto;
 import com.example.hive.dto.response.ApiResponse;
+import com.example.hive.dto.response.AppResponse;
 import com.example.hive.dto.response.TaskResponseDto;
 import com.example.hive.entity.Task;
 import com.example.hive.entity.User;
@@ -14,6 +15,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +30,7 @@ public class TaskServiceImpl implements TaskService {
     private UserRepository userRepository;
 
     @Override
-    public ApiResponse<TaskDto> createTask(TaskDto taskDto) {
+    public AppResponse<TaskResponseDto> createTask(TaskDto taskDto) {
 
         // Check if the user has the TASKER role
 
@@ -48,7 +50,7 @@ public class TaskServiceImpl implements TaskService {
                 .taskDescription(taskDto.getTaskDescription())
                 .taskAddress(taskDto.getTaskAddress())
                 .taskDeliveryAddress(taskDto.getTaskDeliveryAddress())
-                .taskDuration(taskDto.getTaskDuration())
+                .taskDuration(LocalDateTime.parse(taskDto.getTaskDuration()))
                 .budgetRate(taskDto.getBudgetRate())
                 .estimatedTime(taskDto.getEstimatedTime())
                 .tasker(user)
@@ -58,11 +60,11 @@ public class TaskServiceImpl implements TaskService {
         Task savedTask = taskRepository.save(task);
 
 
-        return new ApiResponse<>(HttpStatus.CREATED, "Task created successfully", mapToDto(savedTask));
+        return AppResponse.buildSuccess(mapToDto(savedTask));
     }
 
     @Override
-    public ApiResponse<TaskDto> updateTask(UUID taskId, TaskDto taskDto) {
+    public AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto) {
         // Check if the user has the DOER role
         UUID doerId = UUID. fromString(taskDto.getDoer_id());
 
@@ -82,7 +84,7 @@ public class TaskServiceImpl implements TaskService {
 
         Task updatedTask = taskRepository.save(task);
 
-        return new ApiResponse<>(HttpStatus.OK, "Task updated successfully", mapToDto(updatedTask));
+        return  AppResponse.buildSuccess(mapToDto(updatedTask));
     }
 
     @Override
@@ -114,8 +116,9 @@ public class TaskServiceImpl implements TaskService {
                 .taskDescription(task.getTaskDescription())
                 .taskAddress(task.getTaskAddress())
                 .taskDeliveryAddress(task.getTaskDeliveryAddress())
-                .taskDuration(task.getTaskDuration())
+                .taskDuration(task.getTaskDuration().toString())
                 .budgetRate(task.getBudgetRate())
+                .tasker_id(task.getTask_id().toString())
                 .estimatedTime(task.getEstimatedTime())
                 .status(task.getStatus())
                 .build();

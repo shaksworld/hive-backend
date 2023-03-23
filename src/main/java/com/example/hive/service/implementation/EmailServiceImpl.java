@@ -29,7 +29,7 @@ public class EmailServiceImpl implements EmailService {
         log.info("sending email to {}" , emailDto.getRecipient());
         MimeMessagePreparator mimeMessagePreparator = mimeMessage -> {
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
-            mimeMessageHelper.setFrom(emailDto.getSender(),"Hive Application");
+            mimeMessageHelper.setFrom("hive@blessingchuks.tech","Hive Application");
             mimeMessageHelper.setTo(emailDto.getRecipient());
             mimeMessageHelper.setSubject(emailDto.getSubject());
             mimeMessageHelper.setText(emailDto.getBody(), true);

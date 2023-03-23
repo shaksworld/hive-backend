@@ -41,7 +41,7 @@ public class Task extends AuditEntity {
     private LocalDateTime taskDuration;
     @Enumerated(EnumType.STRING)
     private Status status;
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private User tasker;
     @ManyToOne(cascade = CascadeType.MERGE)
     private User doer;
