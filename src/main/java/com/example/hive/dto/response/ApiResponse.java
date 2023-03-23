@@ -16,9 +16,9 @@ public class ApiResponse<T> {
     private HttpStatus statusCode;
     private String message;
     private T data;
-    private LocalDateTime time = LocalDateTime.now();
+    private String time = LocalDateTime.now().toString();
 
-    public ApiResponse(HttpStatus statusCode, String message, T data, LocalDateTime time) {
+    public ApiResponse(HttpStatus statusCode, String message, T data, String time) {
         this.statusCode = statusCode;
         this.message = message;
         this.data = data;

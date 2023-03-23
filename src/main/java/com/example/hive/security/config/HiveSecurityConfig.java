@@ -52,6 +52,10 @@ public class HiveSecurityConfig {
                         "/actuator/**",
                         "/swagger-resources/**",
                         "/swagger-ui.html",
+                        "/user/**",
+                        "/tasks/search?text=book",
+                        "/tasks/search",
+                        "/tasks/**",//debugging
                         "/webjars/**"
                 ).permitAll()
                 .and()

@@ -9,6 +9,8 @@ import com.example.hive.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,14 +25,16 @@ public class TaskController {
     public TaskController(TaskService taskService) {
         this.taskService = taskService;
     }
+
     @PostMapping("/")
-    public ResponseEntity<ApiResponse<TaskDto>> createTask(@Valid @RequestBody TaskDto taskDto) {
-        ApiResponse<TaskDto> createdTask = taskService.createTask(taskDto);
+//    @PreAuthorize("hasRole('TASKER')")
+    public ResponseEntity<AppResponse<TaskResponseDto>> createTask(@Valid @RequestBody TaskDto taskDto) {
+        AppResponse<TaskResponseDto> createdTask = taskService.createTask(taskDto);
         return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
     }
 
     @PutMapping("/{taskId}")
-    public ApiResponse<TaskDto> updateTask(
+    public AppResponse<TaskResponseDto> updateTask(
             @PathVariable UUID taskId,
             @RequestBody TaskDto taskDto) {
         return taskService.updateTask(taskId, taskDto);
@@ -38,13 +42,13 @@ public class TaskController {
     }
 
     @GetMapping(path = "task/details/{taskId}")
-    public ResponseEntity<ApiResponse<TaskResponseDto>> findTaskById(@PathVariable UUID taskId) {
+    public ResponseEntity<AppResponse<TaskResponseDto>> findTaskById(@PathVariable UUID taskId) {
         TaskResponseDto taskFound = taskService.findTaskById(taskId);
 
         // creates an ApiResponse object with the retrieved task data
-        ApiResponse<TaskResponseDto> apiResponse = new ApiResponse<>();
-        apiResponse.setData(taskFound);
-        apiResponse.setStatusCode(HttpStatus.FOUND); // a status code indicating success
+        AppResponse<TaskResponseDto> apiResponse = new AppResponse<>();
+        apiResponse.setResult(taskFound);
+        apiResponse.setStatusCode(HttpStatus.FOUND.toString()); // a status code indicating success
         apiResponse.setMessage("Task fetched successfully"); // a message describing the response
 
         // returns an HTTP response with a JSON response containing the ApiResponse object
@@ -58,14 +62,20 @@ public class TaskController {
     @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
     @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir
     ) {
-        TaskResponseDto taskFound = (TaskResponseDto) taskService.findAll(pageNo, pageSize, sortBy, sortDir);
+        var tasksFound = taskService.findAll(pageNo, pageSize, sortBy, sortDir);
 
-        return ResponseEntity.status(200).body(AppResponse.builder().statusCode("00").isSuccessful(true).result(taskFound).build());
+        return ResponseEntity.status(200).body(AppResponse.builder().statusCode("00").isSuccessful(true).result(tasksFound).build());
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<TaskResponseDto>> searchTasks(@RequestParam(value = "text", required = true) String text) {
-        return ResponseEntity.ok(taskService.searchTasksBy(text));
+    public ResponseEntity<List<TaskResponseDto>> searchTasks(
+            @RequestParam(value = "text") String text,
+            @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+            @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir
+    ) {
+        return ResponseEntity.ok(taskService.searchTasksBy(text, pageNo, pageSize, sortBy, sortDir));
     }
 }
 

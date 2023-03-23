@@ -17,12 +17,9 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
 
     List<Task> findAll();
 
-    @Query(value = "SELECT t from Task t WHERE "
-            + "t.jobType LIKE CONCAT ('%', :query, '%')"
-            + "OR t.taskDescription LIKE CONCAT ('%', :query, '%')"
-            + "OR t.taskAddress LIKE CONCAT ('%', :query, '%')"
-            + "OR t.taskAddress LIKE CONCAT ('%', :query, '%')")
-    List<Task> searchTasksBy(String text);
+    @Query(value = "SELECT * from tasks t WHERE t.job_type LIKE ?1 or t.task_address LIKE ?1 or " +
+            "t.task_delivery_address LIKE ?1 or t.task_description LIKE ?1" , nativeQuery = true)
+    Optional<List<Task>> searchTasksBy(@RequestParam("query") String text);
 
 
     Optional<Task> findByJobTypeAndTaskDescriptionAndBudgetRateAndTaskAddressAndTaskDeliveryAddressAndEstimatedTimeAndStatus(String jobType, String taskDescription, BigDecimal budgetRate, String taskAddress, String taskDeliveryAddress, Integer estimatedTime, Status status);
