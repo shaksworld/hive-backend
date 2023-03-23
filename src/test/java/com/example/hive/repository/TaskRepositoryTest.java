@@ -10,17 +10,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TaskRepositoryTest {
     @Mock
     TaskRepository taskRepository;
+
+
     private Task task2;
 
     @BeforeEach
@@ -64,4 +68,25 @@ class TaskRepositoryTest {
     }
 
 
+    @Test
+    void searchTasksBy() {
+
+        // Arrange
+
+            // Mock the repository to return some sample tasks
+            List<Task> tasks = Arrays.asList(task2);
+        when(taskRepository.searchTasksBy(anyString())).thenReturn(Optional.of(tasks));
+
+            // Call the service method to search for tasks
+            Optional<List<Task>> result = taskRepository.searchTasksBy("Logistics");
+
+            // Verify that the repository method was called with the correct parameter
+        verify(taskRepository).searchTasksBy("Logistics");
+
+            // Verify that the service method returned the expected result
+            assertTrue(result.isPresent());
+            assertEquals(1, result.get().size());
+            assertTrue(result.get().contains(task2));
+
+    }
 }
