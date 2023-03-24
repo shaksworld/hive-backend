@@ -17,7 +17,7 @@ import java.util.UUID;
 @Entity
 public class User extends AuditEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID user_id;
     @Column(name = "full_name")
     private String fullName;
@@ -37,8 +37,6 @@ public class User extends AuditEntity {
     private Role role;
     @OneToMany(targetEntity = Task.class)
     private List<Task> task;
-
-
 
     public void addRole(Role role) {
         this.role.getRole();
