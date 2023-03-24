@@ -1,10 +1,11 @@
 package com.example.hive.service.implementation;
 
-import com.example.hive.dto.Request.PayStackPaymentRequest;
+import com.example.hive.dto.request.PayStackPaymentRequest;
 import com.example.hive.dto.response.PayStackResponse;
 import com.example.hive.dto.response.VerifyTransactionResponse;
 import com.example.hive.entity.User;
 import com.example.hive.exceptions.CustomException;
+import com.example.hive.repository.UserRepository;
 import com.example.hive.service.EmailService;
 import com.example.hive.service.PayStackService;
 import com.example.hive.utils.AuthDetails;
@@ -47,6 +48,7 @@ public class PayStackImpl implements PayStackService {
 
     private AuthDetails authDetails;
     private EmailService emailService;
+
 
 //    @Autowired
 //    WalletService walletService;
@@ -118,11 +120,11 @@ public class PayStackImpl implements PayStackService {
     @Override
     public VerifyTransactionResponse verifyPayment(String reference) {
 
-        String email = paymentTracker.get(reference);
-
-        if (email == null) {
-            throw new CustomException("Invalid payment reference");
-        }
+//        String email = paymentTracker.get(reference);
+//
+//        if (email == null) {
+//            throw new CustomException("Invalid payment reference");
+//        }
 
         VerifyTransactionResponse payStackResponse;
         try {
@@ -145,12 +147,13 @@ public class PayStackImpl implements PayStackService {
             }
             ObjectMapper mapper = new ObjectMapper();
 
+
             payStackResponse = mapper.readValue(result.toString(), VerifyTransactionResponse.class);
 
 //            walletService.fundWallet(email, payStackResponse, "My new wallet",
 //                    "Wallet funded from payStack");
 
-            paymentTracker.remove(reference);
+//            paymentTracker.remove(reference);
 
         } catch (Exception e) {
             throw new CustomException(e.getMessage());

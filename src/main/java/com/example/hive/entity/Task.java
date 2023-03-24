@@ -42,6 +42,8 @@ public class Task extends AuditEntity {
     private User tasker;
     @ManyToOne(cascade = CascadeType.MERGE)
     private User doer;
+    @OneToOne
+    private TransactionLog transactionLog;
 
 
 }

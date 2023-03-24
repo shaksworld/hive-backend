@@ -1,7 +1,6 @@
 package com.example.hive.dto.request;
 
 import com.example.hive.enums.Status;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -17,7 +15,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class TaskDto {
-    private UUID task_id;
     private String jobType;
     @Size(max = 250)
     private String taskDescription;

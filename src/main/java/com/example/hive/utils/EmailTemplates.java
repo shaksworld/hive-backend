@@ -45,4 +45,27 @@ public class EmailTemplates {
                 .build();
     }
 
+    public static EmailDto createSuccessfulPaymentFromTaskerEmail(User recipient, String reference) {
+
+        String mailContent = "<p> Dear \"" + recipient.getFullName() +  "\", your payment with reference \"" + reference + "\" was successful</p>";
+
+        return EmailDto.builder()
+                .sender(senderCredential)
+                .subject("Payment Successful")
+                .body(mailContent)
+                .recipient(recipient.getEmail())
+                .build();
+    }
+
+    public static EmailDto createSuccessfulCreditEmail(User doer, String taskTitle) {
+
+            String mailContent = "<p> Dear \"" + doer.getFullName() +  "\", your wallet \"" + taskTitle + "\" was successfully credited for the task with description:  \"" + taskTitle + "</p>";
+
+            return EmailDto.builder()
+                    .sender(senderCredential)
+                    .subject("Wallet Credited")
+                    .body(mailContent)
+                    .recipient(doer.getEmail())
+                    .build();
+    }
 }

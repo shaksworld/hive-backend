@@ -1,7 +1,6 @@
 package com.example.hive.service.implementation;
 
 import com.example.hive.dto.request.TaskDto;
-import com.example.hive.dto.response.ApiResponse;
 import com.example.hive.dto.response.AppResponse;
 import com.example.hive.dto.response.TaskResponseDto;
 import com.example.hive.entity.Task;
@@ -13,7 +12,6 @@ import com.example.hive.repository.UserRepository;
 import com.example.hive.service.TaskService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Log4j2
 @Service
@@ -37,16 +34,16 @@ public class TaskServiceImpl implements TaskService {
 
         String tasker1 = taskDto.getTasker_id();
         log.info("about creating task for: " + tasker1);
-        UUID tasker = UUID. fromString(tasker1);
+        User doer = userRepository.findById(UUID.fromString(tasker1))
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        User user = userRepository.findById(tasker)
+        User user = userRepository.findById(UUID.fromString(taskDto.getTasker_id()))
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if (!user.getRole().equals(Role.TASKER)) {
             throw new RuntimeException("User is not a TASKER");
         }
 
         Task task = Task.builder()
-                .task_id(taskDto.getTask_id())
                 .jobType(taskDto.getJobType())
                 .taskDescription(taskDto.getTaskDescription())
                 .taskAddress(taskDto.getTaskAddress())
@@ -55,6 +52,7 @@ public class TaskServiceImpl implements TaskService {
                 .budgetRate(taskDto.getBudgetRate())
                 .estimatedTime(taskDto.getEstimatedTime())
                 .tasker(user)
+                .doer(doer)
                 .status(taskDto.getStatus())
                 .build();
 

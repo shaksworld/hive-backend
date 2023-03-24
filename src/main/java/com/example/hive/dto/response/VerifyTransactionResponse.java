@@ -2,7 +2,9 @@ package com.example.hive.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.gson.JsonObject;
 import lombok.*;
+import org.springframework.stereotype.Component;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -24,5 +26,22 @@ public class VerifyTransactionResponse {
     private String message;
 
     private Data data;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @Component
+    @Getter
+    @Setter
+    public static class Data {
+        private String status;
+        private String reference;
+        private double amount;
+        private String paidAt;
+        private String createdAt;
+        private String channel;
+        private String currency;
+        private String transactionDate;
+
+    }
 
 }
