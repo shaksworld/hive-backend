@@ -29,8 +29,8 @@ public class TaskController {
 
     @PostMapping("/")
 //    @PreAuthorize("hasRole('TASKER')")
-    public ResponseEntity<AppResponse<TaskResponseDto>> createTask(@Valid @RequestBody TaskDto taskDto) {
-        AppResponse<TaskResponseDto> createdTask = taskService.createTask(taskDto);
+    public ResponseEntity<AppResponse<TaskResponseDto>> createTask(@Valid @RequestBody TaskDto taskDto, HttpServletRequest request) {
+        AppResponse<TaskResponseDto> createdTask = taskService.createTask(taskDto, request);
         return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
     }
 
