@@ -5,8 +5,10 @@ import com.example.hive.dto.response.ApiResponse;
 import com.example.hive.dto.response.AppResponse;
 import com.example.hive.dto.response.TaskResponseDto;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface TaskService {
@@ -19,5 +21,7 @@ AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto);
     TaskResponseDto findTaskById(UUID TaskId);
 
     public String applicationUrl(HttpServletRequest request);
+
+    List<TaskResponseDto> searchTasksBy(String text, int pageNo,int pageSize,String sortBy,String sortDir);
 
 }

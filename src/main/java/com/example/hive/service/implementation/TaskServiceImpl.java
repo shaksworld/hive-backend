@@ -7,6 +7,7 @@ import com.example.hive.dto.response.TaskResponseDto;
 import com.example.hive.entity.Task;
 import com.example.hive.entity.User;
 import com.example.hive.enums.Role;
+import com.example.hive.exceptions.ResourceNotFoundException;
 import com.example.hive.repository.TaskRepository;
 import com.example.hive.repository.UserRepository;
 import com.example.hive.service.TaskService;
@@ -64,7 +65,6 @@ public class TaskServiceImpl implements TaskService {
 
         Task savedTask = taskRepository.save(task);
 
-        eventPublisher.publishEvent(new TaskCreatedEvent(user, savedTask, applicationUrl(request)));
 
         return AppResponse.buildSuccess(mapToDto(savedTask));
     }
@@ -132,6 +132,23 @@ public class TaskServiceImpl implements TaskService {
 
     public String applicationUrl(HttpServletRequest request) {
         return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+    }
+
+    @Override
+    public List<TaskResponseDto> searchTasksBy(String text, int pageNo,int pageSize,String sortBy,String sortDir) {
+       Optional<List<Task>> tasksList = taskRepository.searchTasksBy(text);
+        List<TaskResponseDto> listOfTasks = new ArrayList<>();
+
+        if(tasksList.isPresent()) {
+            for (Task task : tasksList.get()) {
+                listOfTasks.add(mapToDto(task));
+            }
+        } else {
+            throw new ResourceNotFoundException("Task not found");
+        }
+
+        return listOfTasks;
+
     }
 }
 

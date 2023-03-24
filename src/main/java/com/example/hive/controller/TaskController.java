@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -51,7 +52,7 @@ public class TaskController {
         apiResponse.setStatusCode(HttpStatus.FOUND.toString()); // a status code indicating success
         apiResponse.setMessage("Task fetched successfully"); // a message describing the response
 
-        // returns an HTTP response with a JSON payload containing the ApiResponse object
+        // returns an HTTP response with a JSON response containing the ApiResponse object
         return ResponseEntity.ok().body(apiResponse);
     }
 
@@ -67,5 +68,15 @@ public class TaskController {
         return ResponseEntity.status(200).body(AppResponse.builder().statusCode("00").isSuccessful(true).result(tasksFound).build());
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<TaskResponseDto>> searchTasks(
+            @RequestParam(value = "text") String text,
+            @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+            @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir
+    ) {
+        return ResponseEntity.ok(taskService.searchTasksBy(text, pageNo, pageSize, sortBy, sortDir));
+    }
 }
 
