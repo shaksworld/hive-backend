@@ -1,12 +1,13 @@
 package com.example.hive.service.implementation;
 
 import com.example.hive.dto.request.TaskDto;
-import com.example.hive.dto.response.ApiResponse;
 import com.example.hive.dto.response.AppResponse;
 import com.example.hive.dto.response.TaskResponseDto;
 import com.example.hive.entity.Task;
 import com.example.hive.entity.User;
 import com.example.hive.enums.Role;
+import com.example.hive.enums.Status;
+import com.example.hive.exceptions.CustomException;
 import com.example.hive.exceptions.ResourceNotFoundException;
 import com.example.hive.repository.TaskRepository;
 import com.example.hive.repository.UserRepository;
@@ -33,22 +34,15 @@ public class TaskServiceImpl implements TaskService {
     private final ModelMapper modelMapper;
 
     @Override
-    public AppResponse<TaskResponseDto> createTask(TaskDto taskDto) {
+    public AppResponse<TaskResponseDto> createTask(TaskDto taskDto, User user) {
 
         // Check if the user has the TASKER role
 
-        String tasker1 = taskDto.getTasker_id();
-        log.info("about creating task for: " + tasker1);
-        UUID tasker = UUID.fromString(tasker1);
-
-        User user = userRepository.findById(tasker)
-                .orElseThrow(() -> new RuntimeException("User not found"));
         if (!user.getRole().equals(Role.TASKER)) {
             throw new RuntimeException("User is not a TASKER");
         }
 
         Task task = Task.builder()
-                .task_id(taskDto.getTask_id())
                 .jobType(taskDto.getJobType())
                 .taskDescription(taskDto.getTaskDescription())
                 .taskAddress(taskDto.getTaskAddress())
@@ -69,9 +63,8 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto) {
         // Check if the user has the DOER role
-        UUID doerId = UUID.fromString(taskDto.getDoer_id());
 
-        User doer = userRepository.findById(doerId)
+        User doer = userRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if (!doer.getRole().equals(Role.DOER)) {
             throw new RuntimeException("User is not a DOER");
@@ -116,17 +109,42 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public List<TaskResponseDto> getUserCompletedTasks(User currentUser) {
         log.info("fetching doer with id {} completed task ", currentUser.getUser_id());
-        List<Task> doerTasks = taskRepository.findCompletedTasksByDoer(currentUser);
-        return doerTasks.stream().map(task -> modelMapper.map(task, TaskResponseDto.class)).collect(Collectors.toList());
 
-    }
+            List<Task> doerTasks = taskRepository.findCompletedTasksByDoer(currentUser);
+            return doerTasks.stream().map(task -> modelMapper.map(task, TaskResponseDto.class)).collect(Collectors.toList());
+        }
+
 
     @Override
     public List<TaskResponseDto> getUserOngoingTasks(User currentUser) {
-        log.info("fetching doer with id {} ongoing task task ", currentUser.getUser_id());
-        List<Task> doerTasks = taskRepository.findOngoingTasksByDoer(currentUser);
-        return doerTasks.stream().map(task -> modelMapper.map(task, TaskResponseDto.class)).collect(Collectors.toList());
+
+            log.info("fetching doer with id {} ongoing task task ", currentUser.getUser_id());
+            List<Task> doerTasks = taskRepository.findOngoingTasksByDoer(currentUser);
+            return doerTasks.stream().map(task -> modelMapper.map(task, TaskResponseDto.class)).collect(Collectors.toList());
+
     }
+
+
+    // doer accepted task
+    @Override
+    public TaskResponseDto acceptTask(User user, String taskId) {
+        Task tasKToUpdate = taskRepository.findById(UUID.fromString(taskId)).orElseThrow(() -> new ResourceNotFoundException("task can not be found"));
+        if (isTaskAccepted(tasKToUpdate)) {
+            tasKToUpdate.setDoer(user);
+            tasKToUpdate.setStatus(Status.ONGOING);
+            Task updatedTask = taskRepository.save(tasKToUpdate);
+            return modelMapper.map(updatedTask, TaskResponseDto.class);
+        }
+        throw new CustomException("Task not available", HttpStatus.BAD_REQUEST);
+    }
+
+    public boolean isTaskAccepted(Task task) {
+        if (task.getStatus().equals(Status.NEW)) {
+            return true;
+        }
+        return false;
+    }
+
 
     public TaskResponseDto mapToDto(Task task) {
 
@@ -137,12 +155,13 @@ public class TaskServiceImpl implements TaskService {
                 .taskDeliveryAddress(task.getTaskDeliveryAddress())
                 .taskDuration(task.getTaskDuration().toString())
                 .budgetRate(task.getBudgetRate())
-                .tasker_id(task.getTask_id().toString())
+                .tasker_id(task.getTasker().getUser_id().toString())
 //                .doer_id(task.getDoer().getUser_id().toString())
                 .estimatedTime(task.getEstimatedTime())
                 .status(task.getStatus())
                 .build();
     }
+
 
 
 }

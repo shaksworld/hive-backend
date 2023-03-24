@@ -1,7 +1,6 @@
 package com.example.hive.service;
 
 import com.example.hive.dto.request.TaskDto;
-import com.example.hive.dto.response.ApiResponse;
 import com.example.hive.dto.response.AppResponse;
 import com.example.hive.dto.response.TaskResponseDto;
 import com.example.hive.entity.User;
@@ -10,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface TaskService {
-    AppResponse<TaskResponseDto> createTask(TaskDto taskDto);
+    AppResponse<TaskResponseDto> createTask(TaskDto taskDto, User user);
 
     //    ApiResponse<TaskDto> updateTask(TaskDto taskDto);
     AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto);
@@ -22,5 +21,6 @@ public interface TaskService {
     List<TaskResponseDto> getUserCompletedTasks(User currentUser);
 
     List<TaskResponseDto> getUserOngoingTasks(User currentUser);
-
+    // doer accepted task
+    TaskResponseDto acceptTask(User user, String taskId);
 }

@@ -15,7 +15,6 @@ import java.util.Date;
     @Table(name = "verification_tokens")
     public class VerificationToken {
         private static final int EXPIRATION_TIME = 10;
-
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;
