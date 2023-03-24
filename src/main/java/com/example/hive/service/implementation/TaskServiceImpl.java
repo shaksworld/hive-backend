@@ -64,7 +64,7 @@ public class TaskServiceImpl implements TaskService {
                 .build();
 
         Task savedTask = taskRepository.save(task);
-
+        eventPublisher.publishEvent(new TaskCreatedEvent(user, savedTask, applicationUrl(request)));
 
         return AppResponse.buildSuccess(mapToDto(savedTask));
     }
