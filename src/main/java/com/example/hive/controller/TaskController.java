@@ -6,6 +6,7 @@ import com.example.hive.dto.response.ApiResponse;
 import com.example.hive.dto.response.AppResponse;
 import com.example.hive.dto.response.TaskResponseDto;
 import com.example.hive.service.TaskService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +28,8 @@ public class TaskController {
 
     @PostMapping("/")
 //    @PreAuthorize("hasRole('TASKER')")
-    public ResponseEntity<AppResponse<TaskResponseDto>> createTask(@Valid @RequestBody TaskDto taskDto) {
-        AppResponse<TaskResponseDto> createdTask = taskService.createTask(taskDto);
+    public ResponseEntity<AppResponse<TaskResponseDto>> createTask(@Valid @RequestBody TaskDto taskDto, HttpServletRequest request) {
+        AppResponse<TaskResponseDto> createdTask = taskService.createTask(taskDto, request);
         return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
     }
 
