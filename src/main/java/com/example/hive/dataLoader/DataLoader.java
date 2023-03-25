@@ -30,6 +30,7 @@ public class DataLoader {
         this.taskRepository = taskRepository;
     }
     @PostConstruct
+
     public void loadUserData() {
         // Create an address for the user and task
         Address address1 = new Address();
@@ -258,18 +259,18 @@ public class DataLoader {
         task8.setStatus(Status.NEW);
 
 
-        User tasker1 = userRepository.findByEmail(user.getEmail()).get();
-        User doer = userRepository.findByEmail(user6.getEmail()).get();
+        User tasker1 = userRepository.findByEmail(user.getEmail()).orElse(null);
+        User doer = userRepository.findByEmail(user6.getEmail()).orElse(null);
         task1.setTasker(tasker1);
         task1.setDoer(doer);
 
-        User tasker2 = userRepository.findByEmail(user3.getEmail()).get();
-        User doer2 = userRepository.findByEmail(user5.getEmail()).get();
+        User tasker2 = userRepository.findByEmail(user3.getEmail()).orElse(null);
+        User doer2 = userRepository.findByEmail(user5.getEmail()).orElse(null);
         task3.setTasker(tasker2);
         task3.setDoer(doer2);
 
-        User tasker3 = userRepository.findByEmail(user2.getEmail()).get();
-        User doer3 = userRepository.findByEmail(user4.getEmail()).get();
+        User tasker3 = userRepository.findByEmail(user2.getEmail()).orElse(null);
+        User doer3 = userRepository.findByEmail(user4.getEmail()).orElse(null);
         task4.setTasker(tasker3);
         task4.setDoer(doer3);
 

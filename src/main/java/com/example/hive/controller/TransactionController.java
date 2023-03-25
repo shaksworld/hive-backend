@@ -39,4 +39,11 @@ public class TransactionController {
         return ResponseEntity.ok(AppResponse.buildSuccessTxn(response));
     }
 
+    @PostMapping("/demo")
+    public ResponseEntity<AppResponse<PayStackResponse>> credit(@RequestBody @Valid final TaskerPaymentRequest taskerPaymentRequest, Principal principal) throws Exception {
+        // we need to make a call to the paystack api to make the payment and get the response
+        PayStackResponse response =  transactionService.makePaymentToDoer(taskerPaymentRequest, principal);
+        return ResponseEntity.ok(AppResponse.buildSuccessTxn(response));
+    }
+
 }

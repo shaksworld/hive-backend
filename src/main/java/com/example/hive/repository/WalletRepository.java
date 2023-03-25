@@ -1,4 +1,4 @@
-package com.example.hive.service.implementation;
+package com.example.hive.repository;
 
 import com.example.hive.entity.User;
 import com.example.hive.entity.Wallet;

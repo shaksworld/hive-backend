@@ -14,12 +14,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.protocol.HTTP;
 import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +38,7 @@ import java.util.HashMap;
 @AllArgsConstructor
 @Service
 @NoArgsConstructor
+@Slf4j
 public class PayStackImpl implements PayStackService {
 
     @Value("${secret.key}")
@@ -77,8 +82,10 @@ public class PayStackImpl implements PayStackService {
             throw new CustomException("No authenticated user found");
         }
 
+
         try {
             Gson gson = new Gson();
+
             StringEntity postingString = new StringEntity(gson.toJson(request));
             HttpClient client = HttpClientBuilder.create().build();
             HttpPost post = new HttpPost(PAY_STACK_BASE_URL);

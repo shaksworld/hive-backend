@@ -33,13 +33,14 @@ public class TaskServiceImpl implements TaskService {
         // Check if the user has the TASKER role
 
         String tasker1 = taskDto.getTasker_id();
+
         log.info("about creating task for: " + tasker1);
-        User doer = userRepository.findById(UUID.fromString(tasker1))
+        User doer = userRepository.findById(UUID.fromString(taskDto.getDoer_id()))
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        User user = userRepository.findById(UUID.fromString(taskDto.getTasker_id()))
+        User tasker = userRepository.findById(UUID.fromString(taskDto.getTasker_id()))
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        if (!user.getRole().equals(Role.TASKER)) {
+        if (!tasker.getRole().equals(Role.TASKER)) {
             throw new RuntimeException("User is not a TASKER");
         }
 
@@ -51,7 +52,8 @@ public class TaskServiceImpl implements TaskService {
                 .taskDuration(LocalDateTime.parse(taskDto.getTaskDuration()))
                 .budgetRate(taskDto.getBudgetRate())
                 .estimatedTime(taskDto.getEstimatedTime())
-                .tasker(user)
+                .tasker(tasker)
+                .isPaidFor(false)
                 .doer(doer)
                 .status(taskDto.getStatus())
                 .build();

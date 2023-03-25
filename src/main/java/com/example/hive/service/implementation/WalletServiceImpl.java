@@ -6,6 +6,8 @@ import com.example.hive.entity.Wallet;
 import com.example.hive.enums.Role;
 import com.example.hive.exceptions.CustomException;
 import com.example.hive.repository.UserRepository;
+import com.example.hive.repository.WalletRepository;
+import com.example.hive.service.UserService;
 import com.example.hive.service.WalletService;
 import com.example.hive.utils.SuccessfulCreditEvent;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +27,14 @@ public class WalletServiceImpl implements WalletService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    public boolean creditDoerWallet(User user, BigDecimal creditAmount, TransactionLog transactionLog){
-       log.info("Crediting doer wallet{}", user.getEmail()) ;
-       user = userRepository.findById(UUID.fromString("8a689b67-2585-4421-b2e6-dd4a04b0c286")).orElseThrow(() -> new CustomException("User not found"));
-       boolean success = false;
+    public boolean creditDoerWallet(UUID doerId, BigDecimal creditAmount, TransactionLog transactionLog){
+
+        log.info("Crediting doer wallet{}", doerId.toString()) ;
+
+       User user = userRepository.findById(doerId).orElseThrow(() -> new CustomException("User not found"));
+        log.info("I found doer {} {}", user.getFullName(),user.getRole().toString()) ;
+
+
         //check role of user
         if (!user.getRole().equals(Role.DOER)) {
             throw new CustomException("User is not a doer");
@@ -36,15 +42,21 @@ public class WalletServiceImpl implements WalletService {
         else {
             //check if user has a wallet
          Wallet wallet =  walletRepository.findByUser(user).orElseThrow(() -> new CustomException("User does not have a wallet"));
-             if (wallet.getAccountBalance() == null) {wallet.setAccountBalance(creditAmount);}
-                //credit wallet
-                wallet.setAccountBalance(wallet.getAccountBalance().add(creditAmount));
-                userRepository.save(user);
+            log.info("I found wallet balance of {}", wallet.getAccountBalance()) ;
+
+            if (wallet.getAccountBalance() == null) {wallet.setAccountBalance(creditAmount);}
+
+             //credit wallet
+            else { wallet.setAccountBalance(wallet.getAccountBalance().add(creditAmount));}
+            log.info("NOW I found wallet balance of {}", wallet.getAccountBalance()) ;
+
+            userRepository.save(user);
                 eventPublisher.publishEvent(new SuccessfulCreditEvent(user, transactionLog));
-                success = true;
+
+                return true;
 
         }
-       return true;
+
     }
 
 
