@@ -15,5 +15,5 @@ public interface PaymentService {
     PayStackResponse makePaymentToDoer(TaskerPaymentRequest taskerPaymentRequest, Principal principal) throws Exception;
 
 
-    VerifyTransactionResponse verifyAndCompletePayment(String reference) throws IOException;
+    VerifyTransactionResponse verifyAndCompletePayment(String reference) throws Exception;
 }

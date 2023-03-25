@@ -22,7 +22,7 @@ public class SuccessfulCreditEventListener implements ApplicationListener<Succes
 
         try {
             emailService.sendEmail(EmailTemplates.createSuccessfulCreditEmail(doer, taskTitle));
-            emailService.sendEmail(EmailTemplates.createSuccessfulPaymentFromTaskerEmail(transactionLog.getTaskerDepositor(), transactionLog.getDoerWithdrawer().getEmail()));
+            emailService.sendEmail(EmailTemplates.createSuccessfulPaymentFromTaskerEmail(transactionLog.getTaskerDepositor(),taskTitle));
 
         } catch (Exception e) {
             log.error(e.getMessage());

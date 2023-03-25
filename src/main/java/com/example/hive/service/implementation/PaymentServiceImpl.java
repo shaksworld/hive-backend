@@ -92,7 +92,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public VerifyTransactionResponse verifyAndCompletePayment(String reference) throws IOException {
+    public VerifyTransactionResponse verifyAndCompletePayment(String reference) throws Exception {
         //check status of transaction first
         TransactionLog transactionLog = transactionLogRepository.findByPaystackReference(reference).orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
 
@@ -123,6 +123,8 @@ public class PaymentServiceImpl implements PaymentService {
             transactionLog.setTransactionStatus(TransactionStatus.SUCCESS);
             transactionLogRepository.save(transactionLog);
             task.setIsPaidFor(true);
+            task.setTransactionLog(transactionLog);
+            taskRepository.save(task);
 
         } else {
             throw new CustomException("Transaction failed");
@@ -132,13 +134,10 @@ public class PaymentServiceImpl implements PaymentService {
 
     }
 
-
-
-
     private boolean completeTransactionByCreditingDoer(TransactionLog transactionLog){
         UUID doerId = transactionLog.getDoerWithdrawer().getUser_id();
         BigDecimal creditAmount = transactionLog.getAmount();
      return  walletService.creditDoerWallet(doerId,creditAmount,transactionLog);
     }
-    }
+}
 
