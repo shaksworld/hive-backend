@@ -105,7 +105,12 @@ public class PaymentServiceImpl implements PaymentService {
         var amountPaid = BigDecimal.valueOf(verifyTransactionResponse.getData().getAmount());
         var amountForTask = transactionLog.getAmount();
 
-        if (status.equals("failed")){ transactionLog.setTransactionStatus(TransactionStatus.FAILED);}
+        if (status.equals("failed")){
+            transactionLog.setTransactionStatus(TransactionStatus.FAILED);
+        return verifyTransactionResponse;
+        }
+
+
         if (status.equals("success")) {
 
             if (!(amountPaid.compareTo(amountForTask)==0)){ throw new BadRequestException("Invalid amount was paid for");}
