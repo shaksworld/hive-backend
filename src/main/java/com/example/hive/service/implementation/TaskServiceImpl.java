@@ -7,15 +7,19 @@ import com.example.hive.dto.response.TaskResponseDto;
 import com.example.hive.entity.Task;
 import com.example.hive.entity.User;
 import com.example.hive.enums.Role;
+import com.example.hive.enums.Status;
+import com.example.hive.exceptions.CustomException;
 import com.example.hive.exceptions.ResourceNotFoundException;
 import com.example.hive.repository.TaskRepository;
 import com.example.hive.repository.UserRepository;
 import com.example.hive.service.TaskService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +33,8 @@ import java.util.stream.Collectors;
 public class TaskServiceImpl implements TaskService {
     private TaskRepository taskRepository;
     private UserRepository userRepository;
+
+    private final ModelMapper modelMapper;
 
     @Override
     public AppResponse<TaskResponseDto> createTask(TaskDto taskDto) {
@@ -141,6 +147,26 @@ public class TaskServiceImpl implements TaskService {
         return listOfTasks;
 
     }
+
+   public TaskResponseDto acceptTask(User user, String taskId){
+        Task tasKToUpdate = taskRepository.findById(UUID.fromString(taskId)).orElseThrow(()-> new ResourceNotFoundException("task can not be found"));
+        if(isTaskAccepted(tasKToUpdate)){
+            tasKToUpdate.setDoer(user);
+            tasKToUpdate.setStatus(Status.ONGOING);
+            Task updatedTask = taskRepository.save(tasKToUpdate);
+            return modelMapper.map(updatedTask, TaskResponseDto.class);
+       }
+        throw new CustomException("Task not available");
+   }
+
+
+   public boolean isTaskAccepted(Task task){
+        if(task.getStatus().equals(Status.NEW)){
+            return true;
+        }
+        return false;
+   }
+
 }
 
 

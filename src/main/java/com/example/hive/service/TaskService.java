@@ -4,8 +4,11 @@ import com.example.hive.dto.request.TaskDto;
 import com.example.hive.dto.response.ApiResponse;
 import com.example.hive.dto.response.AppResponse;
 import com.example.hive.dto.response.TaskResponseDto;
+import com.example.hive.entity.Task;
+import com.example.hive.entity.User;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,4 +24,6 @@ AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto);
 
     List<TaskResponseDto> searchTasksBy(String text, int pageNo,int pageSize,String sortBy,String sortDir);
 
+
+    TaskResponseDto acceptTask(User CurrentUser, String taskId);
 }

@@ -1,18 +1,26 @@
 package com.example.hive.controller;
 
 import com.example.hive.constant.AppConstants;
+import com.example.hive.constant.ResponseStatus;
 import com.example.hive.dto.request.TaskDto;
 import com.example.hive.dto.response.ApiResponse;
 import com.example.hive.dto.response.AppResponse;
 import com.example.hive.dto.response.TaskResponseDto;
+import com.example.hive.entity.Task;
+import com.example.hive.entity.User;
+import com.example.hive.exceptions.ResourceNotFoundException;
+import com.example.hive.repository.UserRepository;
 import com.example.hive.service.TaskService;
+import com.example.hive.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,8 +30,13 @@ public class TaskController {
 
     private TaskService taskService;
 
-    public TaskController(TaskService taskService) {
+
+    private final UserRepository userRepository;
+
+    public TaskController(TaskService taskService,
+                          UserRepository userRepository) {
         this.taskService = taskService;
+        this.userRepository = userRepository;
     }
 
     @PostMapping("/")
@@ -76,6 +89,21 @@ public class TaskController {
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir
     ) {
         return ResponseEntity.ok(taskService.searchTasksBy(text, pageNo, pageSize, sortBy, sortDir));
+    }
+
+    @PostMapping("/{taskId}/accept")
+    public ResponseEntity<AppResponse<Object>> acceptTask(@PathVariable("taskId") String taskId, Principal principal) {
+        String email = principal.getName();
+        User currentUser = userRepository.findByEmail(email).orElseThrow(()-> new ResourceNotFoundException("user not found"));
+        taskService.acceptTask(currentUser,taskId)
+         AppResponse<Object> appResponse = AppResponse
+                 .builder()
+                 .statusCode(ResponseStatus.SUCCESSFUL.getCode())
+                 .result(currentUser)
+                 .message("task accepted")
+                 .isSuccessful(true)
+                 .build();
+        return new ResponseEntity<>(appResponse, HttpStatus.OK);
     }
 }
 
