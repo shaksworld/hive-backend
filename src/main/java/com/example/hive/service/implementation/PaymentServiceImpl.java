@@ -9,6 +9,7 @@ import com.example.hive.dto.response.VerifyTransactionResponse;
 import com.example.hive.entity.Task;
 import com.example.hive.entity.TransactionLog;
 import com.example.hive.entity.User;
+import com.example.hive.enums.Role;
 import com.example.hive.exceptions.BadRequestException;
 import com.example.hive.exceptions.CustomException;
 import com.example.hive.exceptions.ResourceNotFoundException;
@@ -47,24 +48,17 @@ public class PaymentServiceImpl implements PaymentService {
         // get logged-in user and check if they are a tasker
         User user = userRepository.findByEmail(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+        if (!user.getRole().equals(Role.TASKER)){throw new BadRequestException("User is not a tasker");}
+
         // get task and check if it exists
         UUID taskId = UUID.fromString(taskerPaymentRequest.getTaskId());
         Task task = taskRepository.findById(taskId).orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
-
         // check if the task has been paid for
         if (task.getIsPaidFor()){throw new BadRequestException("Task has already been paid for");}
 
-    //    check if the task set amount is equal to the amount sent by the user
-       log.info("task.getBudgetRate() = " + task.getBudgetRate());
-       log.info("taskerPaymentRequest.getAmount() = " + BigDecimal.valueOf(taskerPaymentRequest.getAmount()));
-
-        if (!(task.getBudgetRate().compareTo(BigDecimal.valueOf(taskerPaymentRequest.getAmount()))==0)) {
-            throw new BadRequestException("Amount sent is not equal to the amount set for the task");
-        }
-
             var payStackPaymentRequest = PayStackPaymentRequest.builder()
-                    .amount(taskerPaymentRequest.getAmount())
+                    .amount(Double.parseDouble(task.getBudgetRate().toString()))
                     .email(user.getEmail())
                     .build();
            PayStackResponse payStackResponse = payStackService.initTransaction(principal, payStackPaymentRequest);
@@ -77,7 +71,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     private void saveToTransactionLog(PayStackResponse payStackResponse, Task task, User user, TaskerPaymentRequest taskerPaymentRequest) {
         TransactionLog transactionLog = new TransactionLog();
-        transactionLog.setAmount(BigDecimal.valueOf(taskerPaymentRequest.getAmount()));
+        transactionLog.setAmount(task.getBudgetRate());
         transactionLog.setPaystackReference(payStackResponse.getData().getReference());
         transactionLog.setTransactionType(TransactionType.DEPOSIT);
         transactionLog.setTransactionStatus(TransactionStatus.PENDING);

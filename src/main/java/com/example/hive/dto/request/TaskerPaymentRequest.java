@@ -16,6 +16,4 @@ public class TaskerPaymentRequest {
 
     private String taskId;
 
-    @Digits(integer = 9, fraction = 0)
-    private double amount;
 }

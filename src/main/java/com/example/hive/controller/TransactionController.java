@@ -25,7 +25,6 @@ import java.security.Principal;
 @Slf4j
 @RequiredArgsConstructor
 public class TransactionController {
-
     private final PaymentService paymentService;
 
     @PostMapping("/payment")
