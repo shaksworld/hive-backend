@@ -9,11 +9,16 @@ import com.example.hive.exceptions.CustomException;
 import com.example.hive.repository.NotificationRepository;
 import com.example.hive.repository.UserRepository;
 import com.example.hive.service.NotificationService;
+import com.example.hive.utils.EpochTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -121,8 +126,22 @@ public class NotificationServiceImpl implements NotificationService {
         return mapToNotificationResponse(savedNotification);
     }
 
+    @Override
+    public List<NotificationResponseDto> getAllNotificationOfUser(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> {
+            throw new CustomException("User with the email: " + email + " was not found");
+        });
+        List<Notification> notifications = notificationRepository.findNotificationsByUserOrderByCreatedAtDesc(user);
+        List<NotificationResponseDto> notificationResponseDtos = new ArrayList<>();
 
-
+        for(Notification notification : notifications) {
+            NotificationResponseDto notificationResponseDto = new ModelMapper().map(notification, NotificationResponseDto.class);
+            notificationResponseDto.setUserId(user.getUser_id().toString());
+            notificationResponseDto.setElapsedTime(EpochTime.getElapsedTime(notification.getCreatedAt()));
+            notificationResponseDtos.add(notificationResponseDto);
+        }
+        return notificationResponseDtos;
+    }
 
     private NotificationResponseDto mapToNotificationResponse(Notification notification) {
         return NotificationResponseDto.builder()
