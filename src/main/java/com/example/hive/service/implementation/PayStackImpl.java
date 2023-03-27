@@ -55,8 +55,6 @@ public class PayStackImpl implements PayStackService {
     private EmailService emailService;
 
 
-//    @Autowired
-//    WalletService walletService;
 
     private HashMap<String, String> paymentTracker;
 
@@ -126,12 +124,6 @@ public class PayStackImpl implements PayStackService {
 
     @Override
     public VerifyTransactionResponse verifyPayment(String reference) {
-
-//        String email = paymentTracker.get(reference);
-//
-//        if (email == null) {
-//            throw new CustomException("Invalid payment reference");
-//        }
 
         VerifyTransactionResponse payStackResponse;
         try {
