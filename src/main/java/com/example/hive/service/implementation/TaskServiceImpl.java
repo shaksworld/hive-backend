@@ -11,8 +11,12 @@ import com.example.hive.exceptions.ResourceNotFoundException;
 import com.example.hive.repository.TaskRepository;
 import com.example.hive.repository.UserRepository;
 import com.example.hive.service.TaskService;
+import com.example.hive.utils.event.TaskCreatedEvent;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -25,13 +29,14 @@ import java.util.stream.Collectors;
 
 @Log4j2
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
-    private TaskRepository taskRepository;
-    private UserRepository userRepository;
+    private final TaskRepository taskRepository;
+    private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    public AppResponse<TaskResponseDto> createTask(TaskDto taskDto) {
+    public AppResponse<TaskResponseDto> createTask(TaskDto taskDto, HttpServletRequest request) {
 
         // Check if the user has the TASKER role
 
@@ -59,7 +64,7 @@ public class TaskServiceImpl implements TaskService {
                 .build();
 
         Task savedTask = taskRepository.save(task);
-
+        eventPublisher.publishEvent(new TaskCreatedEvent(user, savedTask, applicationUrl(request)));
 
         return AppResponse.buildSuccess(mapToDto(savedTask));
     }
@@ -123,6 +128,10 @@ public class TaskServiceImpl implements TaskService {
                 .estimatedTime(task.getEstimatedTime())
                 .status(task.getStatus())
                 .build();
+    }
+
+    public String applicationUrl(HttpServletRequest request) {
+        return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
 
     @Override
