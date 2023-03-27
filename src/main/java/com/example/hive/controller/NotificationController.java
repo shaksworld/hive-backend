@@ -22,7 +22,7 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-    @GetMapping("user-notifications")
+    @GetMapping("/user-notifications")
     public ResponseEntity<AppResponse<List<NotificationResponseDto>>> getAllNotifications(final Principal principal) {
         final String email = principal.getName();
         try {
