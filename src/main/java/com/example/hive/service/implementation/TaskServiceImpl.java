@@ -1,7 +1,6 @@
 package com.example.hive.service.implementation;
 
 import com.example.hive.dto.request.TaskDto;
-import com.example.hive.dto.response.ApiResponse;
 import com.example.hive.dto.response.AppResponse;
 import com.example.hive.dto.response.TaskResponseDto;
 import com.example.hive.entity.Task;
@@ -9,6 +8,8 @@ import com.example.hive.entity.User;
 import com.example.hive.enums.Role;
 import com.example.hive.enums.Status;
 import com.example.hive.exceptions.CustomException;
+
+
 import com.example.hive.exceptions.ResourceNotFoundException;
 import com.example.hive.repository.TaskRepository;
 import com.example.hive.repository.UserRepository;
@@ -19,7 +20,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,26 +33,18 @@ import java.util.stream.Collectors;
 public class TaskServiceImpl implements TaskService {
     private TaskRepository taskRepository;
     private UserRepository userRepository;
-
     private final ModelMapper modelMapper;
 
     @Override
-    public AppResponse<TaskResponseDto> createTask(TaskDto taskDto) {
+    public AppResponse<TaskResponseDto> createTask(TaskDto taskDto, User user) {
 
         // Check if the user has the TASKER role
 
-        String tasker1 = taskDto.getTasker_id();
-        log.info("about creating task for: " + tasker1);
-        UUID tasker = UUID. fromString(tasker1);
-
-        User user = userRepository.findById(tasker)
-                .orElseThrow(() -> new RuntimeException("User not found"));
         if (!user.getRole().equals(Role.TASKER)) {
             throw new RuntimeException("User is not a TASKER");
         }
 
         Task task = Task.builder()
-                .task_id(taskDto.getTask_id())
                 .jobType(taskDto.getJobType())
                 .taskDescription(taskDto.getTaskDescription())
                 .taskAddress(taskDto.getTaskAddress())
@@ -73,9 +65,8 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto) {
         // Check if the user has the DOER role
-        UUID doerId = UUID. fromString(taskDto.getDoer_id());
 
-        User doer = userRepository.findById(doerId)
+        User doer = userRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if (!doer.getRole().equals(Role.DOER)) {
             throw new RuntimeException("User is not a DOER");
@@ -91,14 +82,14 @@ public class TaskServiceImpl implements TaskService {
 
         Task updatedTask = taskRepository.save(task);
 
-        return  AppResponse.buildSuccess(mapToDto(updatedTask));
+        return AppResponse.buildSuccess(mapToDto(updatedTask));
     }
 
     @Override
-    public List<TaskResponseDto> findAll(int pageNo,int pageSize,String sortBy,String sortDir) {
+    public List<TaskResponseDto> findAll(int pageNo, int pageSize, String sortBy, String sortDir) {
         List<Task> tasks = taskRepository.findAll();
-        List<TaskResponseDto> taskList =  new ArrayList<>();
-        for (Task task: tasks){
+        List<TaskResponseDto> taskList = new ArrayList<>();
+        for (Task task : tasks) {
             taskList.add(mapToDto(task));
         }
 
@@ -108,14 +99,62 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskResponseDto findTaskById(UUID taskId) {
-       Optional<Task> task = taskRepository.findById(taskId);
-       if (task.isPresent()){
-           Task task1 = task.get();
-           return mapToDto(task1);
-       }
+        Optional<Task> task = taskRepository.findById(taskId);
+        if (task.isPresent()) {
+            Task task1 = task.get();
+            return mapToDto(task1);
+        }
 
         return null;
     }
+
+    @Override
+    public List<TaskResponseDto> getUserCompletedTasks(User currentUser) {
+        log.info("fetching doer with id {} completed task ", currentUser.getUser_id());
+
+            List<Task> doerTasks = taskRepository.findCompletedTasksByDoer(currentUser);
+            return doerTasks.stream().map(task -> modelMapper.map(task, TaskResponseDto.class)).collect(Collectors.toList());
+        }
+
+
+    @Override
+    public List<TaskResponseDto> getUserOngoingTasks(User currentUser) {
+
+            log.info("fetching doer with id {} ongoing task task ", currentUser.getUser_id());
+            List<Task> doerTasks = taskRepository.findOngoingTasksByDoer(currentUser);
+            return doerTasks.stream().map(task -> modelMapper.map(task, TaskResponseDto.class)).collect(Collectors.toList());
+
+    }
+
+
+    // doer accepted task
+    @Override
+    public TaskResponseDto acceptTask(User user, String taskId) {
+        Task tasKToUpdate = taskRepository.findById(UUID.fromString(taskId)).orElseThrow(() -> new ResourceNotFoundException("task can not be found"));
+
+        //check if user is doer
+
+        if(!user.getRole().equals(Role.DOER)){
+            throw new CustomException("Task is not accessible for this user", HttpStatus.BAD_REQUEST);
+        }
+
+        if (isTaskAccepted(tasKToUpdate)) {
+            tasKToUpdate.setDoer(user);
+            tasKToUpdate.setStatus(Status.ONGOING);
+            Task updatedTask = taskRepository.save(tasKToUpdate);
+            return modelMapper.map(updatedTask, TaskResponseDto.class);
+        }
+        throw new CustomException("Task not available", HttpStatus.BAD_REQUEST);
+    }
+
+    public boolean isTaskAccepted(Task task) {
+        if (task.getStatus().equals(Status.NEW)) {
+            return true;
+        }
+        return false;
+    }
+
+
     public TaskResponseDto mapToDto(Task task) {
 
         return TaskResponseDto.builder()
@@ -125,11 +164,15 @@ public class TaskServiceImpl implements TaskService {
                 .taskDeliveryAddress(task.getTaskDeliveryAddress())
                 .taskDuration(task.getTaskDuration().toString())
                 .budgetRate(task.getBudgetRate())
-                .tasker_id(task.getTask_id().toString())
+                .tasker_id(task.getTasker().getUser_id().toString())
+//                .doer_id(task.getDoer().getUser_id().toString())
                 .estimatedTime(task.getEstimatedTime())
                 .status(task.getStatus())
                 .build();
     }
+
+
+
 
     @Override
     public List<TaskResponseDto> searchTasksBy(String text, int pageNo,int pageSize,String sortBy,String sortDir) {
@@ -147,25 +190,6 @@ public class TaskServiceImpl implements TaskService {
         return listOfTasks;
 
     }
-
-   public TaskResponseDto acceptTask(User user, String taskId){
-        Task tasKToUpdate = taskRepository.findById(UUID.fromString(taskId)).orElseThrow(()-> new ResourceNotFoundException("task can not be found"));
-        if(isTaskAccepted(tasKToUpdate)){
-            tasKToUpdate.setDoer(user);
-            tasKToUpdate.setStatus(Status.ONGOING);
-            Task updatedTask = taskRepository.save(tasKToUpdate);
-            return modelMapper.map(updatedTask, TaskResponseDto.class);
-       }
-        throw new CustomException("Task not available");
-   }
-
-
-   public boolean isTaskAccepted(Task task){
-        if(task.getStatus().equals(Status.NEW)){
-            return true;
-        }
-        return false;
-   }
 
 }
 

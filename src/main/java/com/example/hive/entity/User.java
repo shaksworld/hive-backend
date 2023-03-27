@@ -38,8 +38,6 @@ public class User extends AuditEntity {
     @OneToMany(targetEntity = Task.class, fetch = FetchType.EAGER)
     private List<Task> task;
 
-
-
     public void addRole(Role role) {
         this.role.getRole();
     }
@@ -47,5 +45,6 @@ public class User extends AuditEntity {
     public Set<Role> getRoles() {
         return Collections.singleton(role);
     }
+
 
 }
