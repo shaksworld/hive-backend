@@ -1,4 +1,4 @@
-package com.example.hive.dto.request;
+package com.example.hive.dto.Request;
 
 import lombok.Getter;
 import lombok.Setter;

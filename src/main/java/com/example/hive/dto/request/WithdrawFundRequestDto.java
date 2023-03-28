@@ -10,5 +10,4 @@ public class WithdrawFundRequestDto {
     @NotNull(message = "amount cannot be null")
     private BigDecimal amount;
     private Long accountNumber;
-    private String bank;
 }

@@ -96,9 +96,9 @@ public class AuthController {
                         .build());
     }
 
-    @GetMapping("/resendVerificationToken{token}")
-    public ResponseEntity<AppResponse<?>> resendVerificationToken(@PathVariable("token") String oldToken) throws IOException {
-        VerificationToken verificationToken = userService.generateNewToken(oldToken);
+    @GetMapping("/resendVerificationToken")
+    public ResponseEntity<AppResponse<?>> resendVerificationToken(@RequestParam String token) throws IOException {
+        VerificationToken verificationToken = userService.generateNewToken(token);
 
         User user = verificationToken.getUser();
 

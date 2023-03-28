@@ -15,12 +15,8 @@ public class Wallet {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String wallet_id;
-    @Column(name = "account_number", length = 10)
-    private long accountNumber;
     @Column(name = "wallet_balance")
     private BigDecimal accountBalance ;
-    @Column(name = "wallet_pin", length = 4)
-    private String pin;
     @Column(name = "activated")
     private boolean isActivated = false;
     @OneToOne

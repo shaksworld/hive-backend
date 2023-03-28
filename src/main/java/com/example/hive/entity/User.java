@@ -35,8 +35,11 @@ public class User extends AuditEntity {
 
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToMany(targetEntity = Task.class)
+    @OneToMany(targetEntity = Task.class, fetch = FetchType.EAGER)
     private List<Task> task;
+    @OneToOne
+    private Wallet wallet;
+
 
     public void addRole(Role role) {
         this.role.getRole();
