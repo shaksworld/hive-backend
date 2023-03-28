@@ -5,10 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
@@ -38,6 +35,11 @@ public class User extends AuditEntity {
     @OneToMany(targetEntity = Task.class, fetch = FetchType.EAGER)
     private List<Task> task;
 
+    @OneToMany(mappedBy = "user")
+    private List<Notification> notificationList = new ArrayList<>();
+
+
+
     public void addRole(Role role) {
         this.role.getRole();
     }
@@ -45,6 +47,5 @@ public class User extends AuditEntity {
     public Set<Role> getRoles() {
         return Collections.singleton(role);
     }
-
 
 }

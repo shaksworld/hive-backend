@@ -1,7 +1,6 @@
 package com.example.hive.controller;
 
 import com.example.hive.constant.AppConstants;
-import com.example.hive.constant.ResponseStatus;
 import com.example.hive.dto.request.TaskDto;
 import com.example.hive.dto.response.AppResponse;
 import com.example.hive.dto.response.TaskResponseDto;
@@ -9,13 +8,11 @@ import com.example.hive.entity.User;
 import com.example.hive.exceptions.ResourceNotFoundException;
 import com.example.hive.repository.UserRepository;
 import com.example.hive.service.TaskService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 
 import java.security.Principal;
 import java.util.List;
@@ -26,7 +23,6 @@ import java.util.UUID;
 public class TaskController {
 
     private TaskService taskService;
-    @Autowired
     private UserRepository userRepository;
 
     public TaskController(TaskService taskService) {
@@ -35,12 +31,22 @@ public class TaskController {
 
     @PostMapping("/")
 //    @PreAuthorize("hasRole('TASKER')")
-    public ResponseEntity<AppResponse<TaskResponseDto>> createTask(@Valid @RequestBody TaskDto taskDto, Principal principal) {
-        String email = principal.getName();
-        User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        AppResponse<TaskResponseDto> createdTask = taskService.createTask(taskDto, currentUser);
+    public ResponseEntity<AppResponse<TaskResponseDto>> createTask(@Valid @RequestBody TaskDto taskDto, HttpServletRequest request) {
+        AppResponse<TaskResponseDto> createdTask = taskService.createTask(taskDto, request);
         return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/{taskId}/accept")
+    public ResponseEntity<String> acceptTask(@PathVariable("taskId") String taskId, Principal principal) {
+        try {
+            String email = principal.getName();
+            User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("user not found"));
+            taskService.acceptTask(currentUser, taskId);
+            return new ResponseEntity<>("Task accepted", HttpStatus.OK);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return new ResponseEntity<>("Task not available", HttpStatus.BAD_REQUEST);
     }
 
     @PutMapping("/{taskId}")
@@ -77,64 +83,6 @@ public class TaskController {
         return ResponseEntity.status(200).body(AppResponse.builder().statusCode("00").isSuccessful(true).result(tasksFound).build());
     }
 
-    //fetch completed task(filtered by login doer)
-    @GetMapping("/user/completed_task")
-    public ResponseEntity<AppResponse<Object>> getUserCompletedTasks(Principal principal) {
-        try {
-            String email = principal.getName();
-            User currentUser = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-            List<TaskResponseDto> doerCompletedTasks = taskService.getUserCompletedTasks(currentUser);
-            AppResponse<Object> appResponse = AppResponse.builder()
-                    .statusCode(ResponseStatus.SUCCESSFUL.getCode())
-                    .result(doerCompletedTasks)
-                    .message(ResponseStatus.SUCCESSFUL.getMessage())
-                    .isSuccessful(true)
-                    .build();
-            return new ResponseEntity<>(appResponse, HttpStatus.OK);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return new ResponseEntity<>(new AppResponse<>(), HttpStatus.INTERNAL_SERVER_ERROR);
-
-    }
-
-
-    //fetch ongoing task(filtered by login doer)
-
-    @GetMapping("/user/ongoing_task")
-    public ResponseEntity<AppResponse<Object>> getUserOngoingTasks(Principal principal) {
-        String email = principal.getName();
-        User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        List<TaskResponseDto> doerOngoingTasks = taskService.getUserOngoingTasks(currentUser);
-        AppResponse<Object> appResponse = AppResponse.builder()
-                .statusCode(ResponseStatus.SUCCESSFUL.getCode())
-                .result(doerOngoingTasks)
-                .message(ResponseStatus.SUCCESSFUL.getMessage())
-                .isSuccessful(true)
-                .build();
-        return new ResponseEntity<>(appResponse, HttpStatus.OK);
-
-    }
-
-    @PostMapping("/{taskId}/accept")
-    public ResponseEntity<String> acceptTask(@PathVariable("taskId") String taskId, Principal principal) {
-        try {
-            String email = principal.getName();
-            User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("user not found"));
-            taskService.acceptTask(currentUser, taskId);
-
-            return new ResponseEntity<>("Task accepted", HttpStatus.OK);
-        }
-        catch(Exception ex){
-            ex.printStackTrace();
-        }
-        return new ResponseEntity<>("Task not available", HttpStatus.BAD_REQUEST);
-
-    }
-
-
     @GetMapping("/search")
     public ResponseEntity<List<TaskResponseDto>> searchTasks(
             @RequestParam(value = "text") String text,
@@ -146,6 +94,4 @@ public class TaskController {
         return ResponseEntity.ok(taskService.searchTasksBy(text, pageNo, pageSize, sortBy, sortDir));
     }
 }
-
-
 
