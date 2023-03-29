@@ -6,14 +6,16 @@ import com.example.hive.dto.response.TaskResponseDto;
 import jakarta.servlet.http.HttpServletRequest;
 import com.example.hive.entity.User;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
 public interface TaskService {
 //    AppResponse<TaskResponseDto> createTask(TaskDto taskDto, HttpServletRequest request);
 public AppResponse<TaskResponseDto> createTask(TaskDto taskDto, User user, HttpServletRequest request);
+    public AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto, Principal principal);
 //    ApiResponse<TaskDto> updateTask(TaskDto taskDto);
-AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto);
+//AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto);
 
     List<TaskResponseDto> findAll(int pageNo,int pageSize,String sortBy,String sortDir);
 
