@@ -51,8 +51,9 @@ public class TaskController {
     @PutMapping("/{taskId}")
     public AppResponse<TaskResponseDto> updateTask(
             @PathVariable UUID taskId,
-            @RequestBody TaskDto taskDto) {
-        return taskService.updateTask(taskId, taskDto);
+            @RequestBody TaskDto taskDto,
+            Principal principal) {
+        return taskService.updateTask(taskId, taskDto,principal);
 
     }
 

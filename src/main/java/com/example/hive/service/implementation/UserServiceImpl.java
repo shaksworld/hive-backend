@@ -3,30 +3,22 @@ package com.example.hive.service.implementation;
 
 import com.example.hive.dto.request.UserRegistrationRequestDto;
 import com.example.hive.dto.response.UserRegistrationResponseDto;
-import com.example.hive.entity.User;
-import com.example.hive.repository.PasswordResetTokenRepository;
-import com.example.hive.repository.UserRepository;
+import com.example.hive.entity.*;
+import com.example.hive.repository.*;
 import com.example.hive.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import com.example.hive.entity.Address;
 import com.example.hive.entity.User;
-import com.example.hive.entity.VerificationToken;
 import com.example.hive.enums.Role;
 import com.example.hive.exceptions.CustomException;
-import com.example.hive.repository.AddressRepository;
 import com.example.hive.repository.UserRepository;
-import com.example.hive.repository.VerificationTokenRepository;
-import com.example.hive.service.UserService;
-import com.example.hive.utils.RegistrationCompleteEvent;
-import lombok.RequiredArgsConstructor;
+import com.example.hive.utils.event.RegistrationCompleteEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.Calendar;
@@ -47,6 +39,8 @@ public class UserServiceImpl implements UserService {
 
     private final VerificationTokenRepository verificationTokenRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+
+    private final WalletRepository walletRepository;
     private final ModelMapper modelMapper;
 
     private final String verificationUrl = "http://localhost:9090/auth";
@@ -75,11 +69,21 @@ public class UserServiceImpl implements UserService {
             throw new CustomException("User already exist", HttpStatus.FORBIDDEN);
         }
         User newUser = saveNewUser(registrationRequestDto);
+        //if user is a doer , create a wallet account
+
+        if (newUser.getRole().equals(Role.DOER)){ createWalletAccount(newUser);}
+
         // generateToken and Save to token repo, send email also
         eventPublisher.publishEvent(new RegistrationCompleteEvent(
                 newUser,verificationUrl
         ));
         return modelMapper.map(newUser, UserRegistrationResponseDto.class);
+    }
+
+    private void createWalletAccount(User newUser) {
+        Wallet newWallet = new Wallet();
+        newWallet.setUser(newUser);
+        walletRepository.save(newWallet);
     }
 
 
@@ -90,7 +94,9 @@ public class UserServiceImpl implements UserService {
         addressRepository.save(address);
 
         BeanUtils.copyProperties(registrationRequestDto, newUser);
+        log.info("user has a role of {}",registrationRequestDto.getRole().toString());
         newUser.addRole(role);
+        log.info("user now has a role of {}",newUser.getRoles().toString());
         newUser.setPassword(passwordEncoder.encode(registrationRequestDto.getPassword()));
 
 
@@ -124,10 +130,18 @@ public class UserServiceImpl implements UserService {
         if (verificationToken.getExpirationTime().getTime() - cal.getTime().getTime() > 0 ) {
             user.setIsVerified(true);
             userRepository.save(user);
+            // activate the wallet of doer account
+           if(user.getRole().equals(Role.DOER)){activateWallet(user);}
             verificationTokenRepository.delete(verificationToken);
             status = true;
         }
         return status;
+    }
+
+    private void activateWallet(User user) {
+        Wallet wallet = walletRepository.findByUser(user).orElseThrow( () -> new CustomException("User does not have a wallet"));
+        wallet.setActivated(true);
+        walletRepository.save(wallet);
     }
 
     @Override

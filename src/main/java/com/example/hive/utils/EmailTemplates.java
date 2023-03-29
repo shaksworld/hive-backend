@@ -18,8 +18,8 @@ public class EmailTemplates {
                 + token;
 
         String mailContent = "<p> Dear "+ recipient.getFullName() +", </p>";
-        mailContent += "<p> Please click the link below to verify your registration, </p>";
-        mailContent += "<h3><a href=\""+ verificationUrl + "\"> VERIFY </a></h3>";
+        mailContent += "<p> Please click the link below to verify your registration with the link below, </p>";
+        mailContent += "<h3><a href=\""+ verificationUrl + "\"> VERIFICATION LINK </a></h3>";
         mailContent += "<p>Thank you <br/> Hive team </p>";
 
 
@@ -68,4 +68,27 @@ public class EmailTemplates {
                 .build();
     }
 
+    public static EmailDto createSuccessfulPaymentFromTaskerEmail(User recipient, String taskTitle) {
+
+        String mailContent = "<p> Dear \"" + recipient.getFullName() +  "\", your payment for for the task with description below was successful: \n \"" + taskTitle + "\" </p>";
+
+        return EmailDto.builder()
+                .sender(senderCredential)
+                .subject("Payment Successful")
+                .body(mailContent)
+                .recipient(recipient.getEmail())
+                .build();
+    }
+
+    public static EmailDto createSuccessfulCreditEmail(User doer, String taskTitle) {
+
+            String mailContent = "<p> Dear \"" + doer.getFullName() +  "\", your wallet was successfully credited for the task with description: \n \"" + taskTitle + "</p>";
+
+            return EmailDto.builder()
+                    .sender(senderCredential)
+                    .subject("Wallet Credited")
+                    .body(mailContent)
+                    .recipient(doer.getEmail())
+                    .build();
+    }
 }
