@@ -6,14 +6,19 @@ import com.example.hive.dto.response.TaskResponseDto;
 import com.example.hive.entity.Task;
 import com.example.hive.entity.User;
 import com.example.hive.enums.Role;
+import com.example.hive.exceptions.ResourceNotFoundException;
 import com.example.hive.enums.Status;
 import com.example.hive.exceptions.CustomException;
 import com.example.hive.exceptions.ResourceNotFoundException;
 import com.example.hive.repository.TaskRepository;
 import com.example.hive.repository.UserRepository;
 import com.example.hive.service.TaskService;
+import com.example.hive.utils.event.TaskCreatedEvent;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.context.ApplicationEventPublisher;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -27,22 +32,30 @@ import java.util.stream.Collectors;
 
 @Log4j2
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
     private TaskRepository taskRepository;
     private UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    public AppResponse<TaskResponseDto> createTask(TaskDto taskDto, User user) {
+    public AppResponse<TaskResponseDto> createTask(TaskDto taskDto, HttpServletRequest request) {
 
         // Check if the user has the TASKER role
 
+        String tasker1 = taskDto.getTasker_id();
+        log.info("about creating task for: " + tasker1);
+        UUID tasker = UUID. fromString(tasker1);
+
+        User user = userRepository.findById(tasker)
+                .orElseThrow(() -> new RuntimeException("User not found"));
         if (!user.getRole().equals(Role.TASKER)) {
             throw new RuntimeException("User is not a TASKER");
         }
 
         Task task = Task.builder()
+                .task_id(taskDto.getTask_id())
                 .jobType(taskDto.getJobType())
                 .taskDescription(taskDto.getTaskDescription())
                 .taskAddress(taskDto.getTaskAddress())
@@ -55,7 +68,7 @@ public class TaskServiceImpl implements TaskService {
                 .build();
 
         Task savedTask = taskRepository.save(task);
-
+        eventPublisher.publishEvent(new TaskCreatedEvent(user, savedTask, applicationUrl(request)));
 
         return AppResponse.buildSuccess(mapToDto(savedTask));
     }
@@ -162,8 +175,26 @@ public class TaskServiceImpl implements TaskService {
                 .build();
     }
 
+    public String applicationUrl(HttpServletRequest request) {
+        return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+    }
 
+    @Override
+    public List<TaskResponseDto> searchTasksBy(String text, int pageNo,int pageSize,String sortBy,String sortDir) {
+       Optional<List<Task>> tasksList = taskRepository.searchTasksBy(text);
+        List<TaskResponseDto> listOfTasks = new ArrayList<>();
 
+        if(tasksList.isPresent()) {
+            for (Task task : tasksList.get()) {
+                listOfTasks.add(mapToDto(task));
+            }
+        } else {
+            throw new ResourceNotFoundException("Task not found");
+        }
+
+        return listOfTasks;
+
+    }
 }
 
 
