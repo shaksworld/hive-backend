@@ -12,7 +12,7 @@ import com.example.hive.entity.User;
 import com.example.hive.enums.Role;
 import com.example.hive.exceptions.CustomException;
 import com.example.hive.repository.UserRepository;
-import com.example.hive.utils.RegistrationCompleteEvent;
+import com.example.hive.utils.event.RegistrationCompleteEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;

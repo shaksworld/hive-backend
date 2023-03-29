@@ -1,4 +1,4 @@
-package com.example.hive.utils;
+package com.example.hive.utils.event;
 
 import com.example.hive.entity.TransactionLog;
 import com.example.hive.entity.User;

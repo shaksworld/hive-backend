@@ -56,7 +56,6 @@ public class PayStackImpl implements PayStackService {
 
 
 
-    private HashMap<String, String> paymentTracker;
 
     @Autowired
     public PayStackImpl(AuthDetails authDetails, EmailService emailService) {
@@ -110,12 +109,8 @@ public class PayStackImpl implements PayStackService {
             throw new Exception("Failure initializing payStack transaction");
         }
 
-        if (paymentTracker == null) {
-            paymentTracker = new HashMap<>();
-        }
 
         String reference = initializeTransactionResponse.getData().getReference();
-        paymentTracker.put(reference, user.getEmail());
 
         emailService.sendEmail(EmailTemplates.createPaymentVerificationCodeMail(user, reference));
 
@@ -149,10 +144,6 @@ public class PayStackImpl implements PayStackService {
 
             payStackResponse = mapper.readValue(result.toString(), VerifyTransactionResponse.class);
 
-//            walletService.fundWallet(email, payStackResponse, "My new wallet",
-//                    "Wallet funded from payStack");
-
-//            paymentTracker.remove(reference);
 
         } catch (Exception e) {
             throw new CustomException(e.getMessage());

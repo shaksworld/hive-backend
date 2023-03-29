@@ -1,7 +1,9 @@
-package com.example.hive.utils;
+package com.example.hive.utils.event.listeners;
 
 import com.example.hive.repository.TaskRepository;
 import com.example.hive.service.EmailService;
+import com.example.hive.utils.EmailTemplates;
+import com.example.hive.utils.event.SuccessfulCreditEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
