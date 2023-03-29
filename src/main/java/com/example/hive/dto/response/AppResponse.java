@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
 
 
 import java.time.LocalDateTime;
@@ -25,6 +26,8 @@ public class AppResponse<T> {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private T result;
     private ErrorDetails error;
+
+
 
     public static  <T> AppResponse<T> buildSuccessTxn(T data) {
         AppResponse<T> response = new AppResponse<>();

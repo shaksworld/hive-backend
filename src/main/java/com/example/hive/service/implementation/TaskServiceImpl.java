@@ -6,6 +6,8 @@ import com.example.hive.dto.response.TaskResponseDto;
 import com.example.hive.entity.Task;
 import com.example.hive.entity.User;
 import com.example.hive.enums.Role;
+import com.example.hive.enums.Status;
+import com.example.hive.exceptions.CustomException;
 import com.example.hive.exceptions.ResourceNotFoundException;
 import com.example.hive.repository.TaskRepository;
 import com.example.hive.repository.UserRepository;
@@ -14,9 +16,12 @@ import com.example.hive.utils.event.TaskCreatedEvent;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,26 +36,22 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final ModelMapper modelMapper;
 
     @Override
     public AppResponse<TaskResponseDto> createTask(TaskDto taskDto, HttpServletRequest request) {
 
         // Check if the user has the TASKER role
 
-        String tasker1 = taskDto.getTasker_id();
+        String emailOfTasker = request.getUserPrincipal().getName();
 
-        log.info("about creating task for: " + tasker1);
-        User tasker = userRepository.findById(UUID.fromString(taskDto.getTasker_id()))
+        log.info("about creating task for: " + emailOfTasker);
+        User tasker = userRepository.findByEmail(emailOfTasker)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
         if (!tasker.getRole().equals(Role.TASKER)) {
             throw new RuntimeException("User is not a TASKER");
         }
-
-        // TODO this block of code should be removed.. doer is assigned when task is accepted
-        User doer = userRepository.findById(UUID.fromString(taskDto.getDoer_id()))
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-
 
         Task task = Task.builder()
                 .jobType(taskDto.getJobType())
@@ -62,23 +63,24 @@ public class TaskServiceImpl implements TaskService {
                 .estimatedTime(taskDto.getEstimatedTime())
                 .tasker(tasker)
                 .isPaidFor(false)
-                .doer(doer)
                 .status(taskDto.getStatus())
                 .build();
 
         Task savedTask = taskRepository.save(task);
-        eventPublisher.publishEvent(new TaskCreatedEvent(doer, savedTask, applicationUrl(request)));
+        eventPublisher.publishEvent(new TaskCreatedEvent(tasker,savedTask, applicationUrl(request)));
 
         return AppResponse.buildSuccess(mapToDto(savedTask));
     }
 
     @Override
-    public AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto) {
+    public AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto, Principal principal) {
         // Check if the user has the DOER role
-        UUID doerId = UUID. fromString(taskDto.getDoer_id());
+        String emailOfDoer = principal.getName();
 
-        User doer = userRepository.findById(doerId)
+        log.info("about updating task for: " + emailOfDoer);
+        User doer = userRepository.findByEmail(emailOfDoer)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
         if (!doer.getRole().equals(Role.DOER)) {
             throw new RuntimeException("User is not a DOER");
         }
@@ -151,6 +153,25 @@ public class TaskServiceImpl implements TaskService {
 
         return listOfTasks;
 
+    }
+
+    @Override
+    public TaskResponseDto acceptTask(User user, String taskId) {
+        Task tasKToUpdate = taskRepository.findById(UUID.fromString(taskId)).orElseThrow(() -> new ResourceNotFoundException("task can not be found"));
+        if (isTaskAccepted(tasKToUpdate)) {
+            tasKToUpdate.setDoer(user);
+            tasKToUpdate.setStatus(Status.ONGOING);
+            Task updatedTask = taskRepository.save(tasKToUpdate);
+            return modelMapper.map(updatedTask, TaskResponseDto.class);
+        }
+        throw new CustomException("Task not available", HttpStatus.BAD_REQUEST);
+    }
+
+    public boolean isTaskAccepted(Task task) {
+        if (task.getStatus().equals(Status.NEW)) {
+            return true;
+        }
+        return false;
     }
 }
 

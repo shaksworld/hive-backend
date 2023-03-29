@@ -182,7 +182,7 @@ public class DataLoader {
 
         for (User u: users){
             if (userRepository.findByEmail(u.getEmail()).isEmpty()) {
-                userRepository.save(u);
+//                userRepository.save(u);
             }
         }
 
