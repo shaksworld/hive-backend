@@ -34,28 +34,21 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
-    private TaskRepository taskRepository;
-    private UserRepository userRepository;
+    private final TaskRepository taskRepository;
+    private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    public AppResponse<TaskResponseDto> createTask(TaskDto taskDto, HttpServletRequest request) {
+    public AppResponse<TaskResponseDto> createTask(TaskDto taskDto, User user, HttpServletRequest request) {
 
-        // Check if the user has the TASKER role
+//         Check if the user has the TASKER role
 
-        String tasker1 = taskDto.getTasker_id();
-        log.info("about creating task for: " + tasker1);
-        UUID tasker = UUID. fromString(tasker1);
-
-        User user = userRepository.findById(tasker)
-                .orElseThrow(() -> new RuntimeException("User not found"));
         if (!user.getRole().equals(Role.TASKER)) {
             throw new RuntimeException("User is not a TASKER");
         }
 
         Task task = Task.builder()
-                .task_id(taskDto.getTask_id())
                 .jobType(taskDto.getJobType())
                 .taskDescription(taskDto.getTaskDescription())
                 .taskAddress(taskDto.getTaskAddress())
@@ -123,17 +116,17 @@ public class TaskServiceImpl implements TaskService {
     public List<TaskResponseDto> getUserCompletedTasks(User currentUser) {
         log.info("fetching doer with id {} completed task ", currentUser.getUser_id());
 
-            List<Task> doerTasks = taskRepository.findCompletedTasksByDoer(currentUser);
-            return doerTasks.stream().map(task -> modelMapper.map(task, TaskResponseDto.class)).collect(Collectors.toList());
-        }
+        List<Task> doerTasks = taskRepository.findCompletedTasksByDoer(currentUser);
+        return doerTasks.stream().map(task -> modelMapper.map(task, TaskResponseDto.class)).collect(Collectors.toList());
+    }
 
 
     @Override
     public List<TaskResponseDto> getUserOngoingTasks(User currentUser) {
 
-            log.info("fetching doer with id {} ongoing task task ", currentUser.getUser_id());
-            List<Task> doerTasks = taskRepository.findOngoingTasksByDoer(currentUser);
-            return doerTasks.stream().map(task -> modelMapper.map(task, TaskResponseDto.class)).collect(Collectors.toList());
+        log.info("fetching doer with id {} ongoing task task ", currentUser.getUser_id());
+        List<Task> doerTasks = taskRepository.findOngoingTasksByDoer(currentUser);
+        return doerTasks.stream().map(task -> modelMapper.map(task, TaskResponseDto.class)).collect(Collectors.toList());
 
     }
 
@@ -180,11 +173,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskResponseDto> searchTasksBy(String text, int pageNo,int pageSize,String sortBy,String sortDir) {
-       Optional<List<Task>> tasksList = taskRepository.searchTasksBy(text);
+    public List<TaskResponseDto> searchTasksBy(String text, int pageNo, int pageSize, String sortBy, String sortDir) {
+        Optional<List<Task>> tasksList = taskRepository.searchTasksBy(text);
         List<TaskResponseDto> listOfTasks = new ArrayList<>();
 
-        if(tasksList.isPresent()) {
+        if (tasksList.isPresent()) {
             for (Task task : tasksList.get()) {
                 listOfTasks.add(mapToDto(task));
             }
@@ -195,6 +188,6 @@ public class TaskServiceImpl implements TaskService {
         return listOfTasks;
 
     }
+
+
 }
-
-

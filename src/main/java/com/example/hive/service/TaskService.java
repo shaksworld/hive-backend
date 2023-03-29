@@ -12,7 +12,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface TaskService {
-    AppResponse<TaskResponseDto> createTask(TaskDto taskDto, HttpServletRequest request);
+//    AppResponse<TaskResponseDto> createTask(TaskDto taskDto, HttpServletRequest request);
+public AppResponse<TaskResponseDto> createTask(TaskDto taskDto, User user, HttpServletRequest request);
 //    ApiResponse<TaskDto> updateTask(TaskDto taskDto);
 AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto);
 
