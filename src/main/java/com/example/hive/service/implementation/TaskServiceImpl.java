@@ -1,7 +1,6 @@
 package com.example.hive.service.implementation;
 
 import com.example.hive.dto.request.TaskDto;
-import com.example.hive.dto.response.ApiResponse;
 import com.example.hive.dto.response.AppResponse;
 import com.example.hive.dto.response.TaskResponseDto;
 import com.example.hive.entity.Task;
@@ -15,7 +14,6 @@ import com.example.hive.repository.UserRepository;
 import com.example.hive.service.TaskService;
 import com.example.hive.utils.event.TaskCreatedEvent;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
@@ -28,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Log4j2
 @Service
@@ -45,7 +42,7 @@ public class TaskServiceImpl implements TaskService {
 
         // Check if the user has the TASKER role
 
-        String tasker1 = taskDto.getTask_id();
+        String tasker1 = taskDto.getTaskerId();
         log.info("about creating task for: " + tasker1);
         UUID tasker = UUID.fromString(tasker1);
 
@@ -56,7 +53,7 @@ public class TaskServiceImpl implements TaskService {
         }
 
         Task task = Task.builder()
-                .task_id(taskDto.getTask_id())
+                .task_id(taskDto.getTaskId())
                 .jobType(taskDto.getJobType())
                 .taskDescription(taskDto.getTaskDescription())
                 .taskAddress(taskDto.getTaskAddress())
@@ -96,7 +93,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto) {
         // Check if the user has the DOER role
-        UUID doerId = UUID.fromString(taskDto.getDoer_id());
+        UUID doerId = UUID.fromString(taskDto.getDoerId());
 
         User doer = userRepository.findById(doerId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
