@@ -51,7 +51,8 @@ public class HiveSecurityConfig {
                         "/tasks/search?text=book",
                         "/tasks/search",
                         "/tasks/**",//debugging
-                        "/webjars/**"
+                        "/webjars/**",
+                        "/api/notifications/**"
                 ).permitAll()
                 .and()
                 .sessionManagement()
