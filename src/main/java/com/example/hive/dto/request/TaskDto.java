@@ -17,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class TaskDto {
-    private UUID task_id;
+    private UUID taskId;
     private String jobType;
     @Size(max = 250)
     private String taskDescription;
@@ -25,9 +25,9 @@ public class TaskDto {
     private String taskAddress;
     private String taskDeliveryAddress;
     private Integer estimatedTime;
-//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private String taskDuration;
     private Status status;
-    private String tasker_id;
-    private String doer_id;
+    private String taskerId;
+    private String doerId;
+
 }
