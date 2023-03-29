@@ -17,8 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.security.Principal;
-import java.util.List;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,8 +36,11 @@ public class TaskController {
 
     @PostMapping("/")
 //    @PreAuthorize("hasRole('TASKER')")
-    public ResponseEntity<AppResponse<TaskResponseDto>> createTask(@Valid @RequestBody TaskDto taskDto, HttpServletRequest request) {
-        AppResponse<TaskResponseDto> createdTask = taskService.createTask(taskDto, request);
+    public ResponseEntity<AppResponse<TaskResponseDto>> createTask(@Valid @RequestBody TaskDto taskDto, Principal principal,HttpServletRequest request) {
+        String email = principal.getName();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        AppResponse<TaskResponseDto> createdTask = taskService.createTask(taskDto, currentUser, request);
         return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
     }
 
@@ -75,16 +78,6 @@ public class TaskController {
         return ResponseEntity.status(200).body(AppResponse.builder().statusCode("00").isSuccessful(true).result(tasksFound).build());
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<TaskResponseDto>> searchTasks(
-            @RequestParam(value = "text") String text,
-            @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
-            @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
-            @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
-            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir
-    ) {
-        return ResponseEntity.ok(taskService.searchTasksBy(text, pageNo, pageSize, sortBy, sortDir));
-    }
     //fetch completed task(filtered by login doer)
     @GetMapping("/user/completed_task")
     public ResponseEntity<AppResponse<Object>> getUserCompletedTasks(Principal principal) {
@@ -142,5 +135,15 @@ public class TaskController {
     }
 
 
+    @GetMapping("/search")
+    public ResponseEntity<List<TaskResponseDto>> searchTasks(
+            @RequestParam(value = "text") String text,
+            @RequestParam(value = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+            @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir
+    ) {
+        return ResponseEntity.ok(taskService.searchTasksBy(text, pageNo, pageSize, sortBy, sortDir));
+    }
 }
 
