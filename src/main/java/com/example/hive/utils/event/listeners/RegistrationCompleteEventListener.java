@@ -1,18 +1,15 @@
-package com.example.hive.utils;
+package com.example.hive.utils.event.listeners;
 
 import com.example.hive.entity.User;
-import com.example.hive.entity.VerificationToken;
-import com.example.hive.repository.VerificationTokenRepository;
 import com.example.hive.service.EmailService;
 import com.example.hive.service.UserService;
+import com.example.hive.utils.EmailTemplates;
+import com.example.hive.utils.event.RegistrationCompleteEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 @Component

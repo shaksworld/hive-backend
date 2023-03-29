@@ -5,21 +5,23 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
 
+
 @Getter
 @Setter
 @Builder
-public class ResourceNotFoundException extends RuntimeException{
+public class BadRequestException extends RuntimeException{
 
     protected String message;
-    protected HttpStatus status = HttpStatus.FOUND;
+    protected HttpStatus status = HttpStatus.BAD_REQUEST;
 
-    public ResourceNotFoundException(String message) {
+    public BadRequestException(String message) {
         super(message);
         this.message = message;
     }
-    public ResourceNotFoundException(String message, HttpStatus status) {
+
+    public BadRequestException(String message, HttpStatus status) {
         super(message);
-        this.status = status;
         this.message = message;
+        this.status = status;
     }
 }

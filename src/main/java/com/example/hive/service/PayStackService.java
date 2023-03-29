@@ -1,6 +1,6 @@
 package com.example.hive.service;
 
-import com.example.hive.dto.Request.PayStackPaymentRequest;
+import com.example.hive.dto.request.PayStackPaymentRequest;
 import com.example.hive.dto.response.PayStackResponse;
 import com.example.hive.dto.response.VerifyTransactionResponse;
 

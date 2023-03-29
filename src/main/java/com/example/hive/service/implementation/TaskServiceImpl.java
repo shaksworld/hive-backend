@@ -21,6 +21,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,13 +67,17 @@ public class TaskServiceImpl implements TaskService {
         return AppResponse.buildSuccess(mapToDto(savedTask));
     }
 
-    @Override
-    public AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto) {
-        // Check if the user has the DOER role
-        UUID doerId = UUID.fromString(taskDto.getDoerId());
 
-        User doer = userRepository.findById(doerId)
+
+    @Override
+    public AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto, Principal principal) {
+        // Check if the user has the DOER role
+        String emailOfDoer = principal.getName();
+
+        log.info("about updating task for: " + emailOfDoer);
+        User doer = userRepository.findByEmail(emailOfDoer)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
         if (!doer.getRole().equals(Role.DOER)) {
             throw new RuntimeException("User is not a DOER");
         }
@@ -87,28 +92,27 @@ public class TaskServiceImpl implements TaskService {
 
         Task updatedTask = taskRepository.save(task);
 
-        return AppResponse.buildSuccess(mapToDto(updatedTask));
+        return  AppResponse.buildSuccess(mapToDto(updatedTask));
     }
 
     @Override
-    public List<TaskResponseDto> findAll(int pageNo, int pageSize, String sortBy, String sortDir) {
+    public List<TaskResponseDto> findAll(int pageNo,int pageSize,String sortBy,String sortDir) {
         List<Task> tasks = taskRepository.findAll();
-        List<TaskResponseDto> taskList = new ArrayList<>();
-        for (Task task : tasks) {
+        List<TaskResponseDto> taskList =  new ArrayList<>();
+        for (Task task: tasks){
             taskList.add(mapToDto(task));
         }
-
 
         return taskList;
     }
 
     @Override
     public TaskResponseDto findTaskById(UUID taskId) {
-        Optional<Task> task = taskRepository.findById(taskId);
-        if (task.isPresent()) {
-            Task task1 = task.get();
-            return mapToDto(task1);
-        }
+       Optional<Task> task = taskRepository.findById(taskId);
+       if (task.isPresent()){
+           Task task1 = task.get();
+           return mapToDto(task1);
+       }
 
         return null;
     }
@@ -132,7 +136,43 @@ public class TaskServiceImpl implements TaskService {
     }
 
 
-    // doer accepted task
+
+    public TaskResponseDto mapToDto(Task task) {
+
+        return TaskResponseDto.builder()
+                .jobType(task.getJobType())
+                .taskDescription(task.getTaskDescription())
+                .taskAddress(task.getTaskAddress())
+                .taskDeliveryAddress(task.getTaskDeliveryAddress())
+                .taskDuration(task.getTaskDuration().toString())
+                .budgetRate(task.getBudgetRate())
+                .tasker_id(task.getTask_id().toString())
+                .estimatedTime(task.getEstimatedTime())
+                .status(task.getStatus())
+                .build();
+    }
+
+    public String applicationUrl(HttpServletRequest request) {
+        return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+    }
+
+    @Override
+    public List<TaskResponseDto> searchTasksBy(String text, int pageNo,int pageSize,String sortBy,String sortDir) {
+       Optional<List<Task>> tasksList = taskRepository.searchTasksBy(text);
+        List<TaskResponseDto> listOfTasks = new ArrayList<>();
+
+        if(tasksList.isPresent()) {
+            for (Task task : tasksList.get()) {
+                listOfTasks.add(mapToDto(task));
+            }
+        } else {
+            throw new ResourceNotFoundException("Task not found");
+        }
+
+        return listOfTasks;
+
+    }
+
     @Override
     public TaskResponseDto acceptTask(User user, String taskId) {
         Task tasKToUpdate = taskRepository.findById(UUID.fromString(taskId)).orElseThrow(() -> new ResourceNotFoundException("task can not be found"));
@@ -151,45 +191,6 @@ public class TaskServiceImpl implements TaskService {
         }
         return false;
     }
-
-
-    public TaskResponseDto mapToDto(Task task) {
-
-        return TaskResponseDto.builder()
-                .jobType(task.getJobType())
-                .taskDescription(task.getTaskDescription())
-                .taskAddress(task.getTaskAddress())
-                .taskDeliveryAddress(task.getTaskDeliveryAddress())
-                .taskDuration(task.getTaskDuration().toString())
-                .budgetRate(task.getBudgetRate())
-                .tasker_id(task.getTasker().getUser_id().toString())
-//                .doer_id(task.getDoer().getUser_id().toString())
-                .estimatedTime(task.getEstimatedTime())
-                .status(task.getStatus())
-                .build();
-    }
-
-    public String applicationUrl(HttpServletRequest request) {
-        return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
-    }
-
-    @Override
-    public List<TaskResponseDto> searchTasksBy(String text, int pageNo,int pageSize,String sortBy,String sortDir) {
-       Optional<List<Task>> tasksList = taskRepository.searchTasksBy(text);
-        List<TaskResponseDto> listOfTasks = new ArrayList<>();
-
-        if (tasksList.isPresent()) {
-            for (Task task : tasksList.get()) {
-                listOfTasks.add(mapToDto(task));
-            }
-        } else {
-            throw new ResourceNotFoundException("Task not found");
-        }
-
-        return listOfTasks;
-
-    }
-
 }
 
 

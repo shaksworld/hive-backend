@@ -26,9 +26,10 @@ public class AuthDetails {
 
     public User getAuthorizedUser(Principal principal) {
         if (principal != null) {
-            final UserDetails currentUser = (UserDetails) ((Authentication) principal).getPrincipal();
-            return userRepository.findByEmail(currentUser.getUsername()).orElseThrow(
-                    () -> new CustomException(currentUser.getUsername())
+            var currentUser = principal;
+//            final UserDetails currentUser = (UserDetails) ((Authentication) principal).getPrincipal();
+            return userRepository.findByEmail(currentUser.getName()).orElseThrow(
+                    () -> new CustomException(currentUser.getName())
             );
         } else {
             return null;

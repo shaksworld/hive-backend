@@ -1,6 +1,7 @@
 package com.example.hive.dto.response;
 
 import com.example.hive.constant.ResponseStatus;
+import com.example.hive.exceptions.ErrorDetails;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +25,7 @@ public class AppResponse<T> {
     private final String time = LocalDateTime.now().toString();
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private T result;
+    private ErrorDetails error;
 
 
 
