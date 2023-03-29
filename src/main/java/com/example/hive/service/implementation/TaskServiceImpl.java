@@ -6,7 +6,6 @@ import com.example.hive.dto.response.TaskResponseDto;
 import com.example.hive.entity.Task;
 import com.example.hive.entity.User;
 import com.example.hive.enums.Role;
-import com.example.hive.exceptions.ResourceNotFoundException;
 import com.example.hive.enums.Status;
 import com.example.hive.exceptions.CustomException;
 import com.example.hive.exceptions.ResourceNotFoundException;
@@ -15,7 +14,6 @@ import com.example.hive.repository.UserRepository;
 import com.example.hive.service.TaskService;
 import com.example.hive.utils.event.TaskCreatedEvent;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
@@ -38,6 +36,8 @@ public class TaskServiceImpl implements TaskService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final ApplicationEventPublisher eventPublisher;
+
+
 
     @Override
     public AppResponse<TaskResponseDto> createTask(TaskDto taskDto, User user, HttpServletRequest request) {
@@ -69,8 +69,9 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto) {
         // Check if the user has the DOER role
+        UUID doerId = UUID.fromString(taskDto.getDoerId());
 
-        User doer = userRepository.findById(taskId)
+        User doer = userRepository.findById(doerId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if (!doer.getRole().equals(Role.DOER)) {
             throw new RuntimeException("User is not a DOER");
@@ -173,8 +174,8 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskResponseDto> searchTasksBy(String text, int pageNo, int pageSize, String sortBy, String sortDir) {
-        Optional<List<Task>> tasksList = taskRepository.searchTasksBy(text);
+    public List<TaskResponseDto> searchTasksBy(String text, int pageNo,int pageSize,String sortBy,String sortDir) {
+       Optional<List<Task>> tasksList = taskRepository.searchTasksBy(text);
         List<TaskResponseDto> listOfTasks = new ArrayList<>();
 
         if (tasksList.isPresent()) {
