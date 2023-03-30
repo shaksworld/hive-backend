@@ -7,6 +7,7 @@ import com.example.hive.entity.Task;
 import com.example.hive.entity.User;
 import com.example.hive.enums.Role;
 import com.example.hive.enums.Status;
+import com.example.hive.exceptions.BadRequestException;
 import com.example.hive.exceptions.CustomException;
 import com.example.hive.exceptions.ResourceNotFoundException;
 import com.example.hive.repository.TaskRepository;
@@ -185,11 +186,50 @@ public class TaskServiceImpl implements TaskService {
         throw new CustomException("Task not available", HttpStatus.BAD_REQUEST);
     }
 
-    public boolean isTaskAccepted(Task task) {
-        if (task.getStatus().equals(Status.NEW)) {
-            return true;
+    @Override
+    public TaskResponseDto doerCompletesTask(User doer, String taskId) {
+        Task tasKToUpdate = taskRepository.findById(UUID.fromString(taskId)).orElseThrow(() -> new ResourceNotFoundException("task can not be found"));
+
+        //check if doer is the same as the doer associated with the task
+        if (isTaskOngoing(tasKToUpdate) && isDoerTheSameAsInTheTask(tasKToUpdate,doer)) {
+            tasKToUpdate.setStatus(Status.PENDING_APPROVAL);
+            Task updatedTask = taskRepository.save(tasKToUpdate);
+            return modelMapper.map(updatedTask, TaskResponseDto.class);
         }
-        return false;
+        throw new BadRequestException("Something Went wrong");
+    }
+
+    @Override
+    public TaskResponseDto taskerApprovesCompletedTask(User tasker, String taskId) {
+        Task tasKToUpdate = taskRepository.findById(UUID.fromString(taskId)).orElseThrow(() -> new ResourceNotFoundException("task can not be found"));
+
+        //check if tasker is the same as the tasker associated with the task
+        if (isTaskPendingApproval(tasKToUpdate) && isTaskerTheOwnerOfTask(tasKToUpdate,tasker)) {
+            tasKToUpdate.setStatus(Status.COMPLETED);
+            Task updatedTask = taskRepository.save(tasKToUpdate);
+            return modelMapper.map(updatedTask, TaskResponseDto.class);
+        }
+        throw new BadRequestException("Something Went wrong");
+    }
+
+    private boolean isTaskPendingApproval(Task tasK) {
+        return tasK.getStatus().equals(Status.PENDING_APPROVAL);
+    }
+
+    private boolean isTaskerTheOwnerOfTask(Task task, User tasker) {
+        return task.getTasker().equals(tasker);
+    }
+
+    private boolean isDoerTheSameAsInTheTask(Task task, User doer) {
+        return task.getDoer().equals(doer);
+    }
+
+    private boolean isTaskAccepted(Task task) {
+        return task.getStatus().equals(Status.NEW);
+    }
+
+    private boolean isTaskOngoing(Task task) {
+        return task.getStatus().equals(Status.ONGOING);
     }
 }
 

@@ -134,6 +134,35 @@ public class TaskController {
 
     }
 
+    @PostMapping("/{taskId}/complete") //doer
+    public ResponseEntity<String> doerCompletesTask  (@PathVariable("taskId") String taskId, Principal principal) {
+        try {
+            String email = principal.getName();
+            User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("user not found"));
+            taskService.doerCompletesTask(currentUser, taskId);
+            return new ResponseEntity<>("Task ready for approval", HttpStatus.OK);
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+        }
+        return new ResponseEntity<>("Task not available", HttpStatus.BAD_REQUEST);
+
+    }
+
+    @PostMapping("/{taskId}/approve")//tasker
+    public ResponseEntity<String> taskerApprovesCompletedTask  (@PathVariable("taskId") String taskId, Principal principal) {
+        try {
+            String email = principal.getName();
+            User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("user not found"));
+            taskService.taskerApprovesCompletedTask(currentUser, taskId);
+            return new ResponseEntity<>("Task completed", HttpStatus.OK);
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+        }
+        return new ResponseEntity<>("Task not available", HttpStatus.BAD_REQUEST);
+
+    }
 
     @GetMapping("/search")
     public ResponseEntity<List<TaskResponseDto>> searchTasks(
@@ -145,5 +174,8 @@ public class TaskController {
     ) {
         return ResponseEntity.ok(taskService.searchTasksBy(text, pageNo, pageSize, sortBy, sortDir));
     }
+
+
+
 }
 

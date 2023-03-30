@@ -30,4 +30,8 @@ public AppResponse<TaskResponseDto> createTask(TaskDto taskDto, User user, HttpS
     List<TaskResponseDto> getUserOngoingTasks(User currentUser);
     // doer accepted task
     TaskResponseDto acceptTask(User user, String taskId);
+
+    TaskResponseDto doerCompletesTask(User currentUser, String taskId);
+
+    TaskResponseDto taskerApprovesCompletedTask(User currentUser, String taskId);
 }
