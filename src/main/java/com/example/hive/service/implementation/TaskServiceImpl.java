@@ -1,14 +1,19 @@
 package com.example.hive.service.implementation;
 
+import com.example.hive.constant.TransactionStatus;
 import com.example.hive.dto.request.TaskDto;
 import com.example.hive.dto.response.AppResponse;
 import com.example.hive.dto.response.TaskResponseDto;
+import com.example.hive.entity.EscrowWallet;
+import com.example.hive.entity.PaymentLog;
 import com.example.hive.entity.Task;
 import com.example.hive.entity.User;
 import com.example.hive.enums.Role;
 import com.example.hive.enums.Status;
+import com.example.hive.exceptions.BadRequestException;
 import com.example.hive.exceptions.CustomException;
 import com.example.hive.exceptions.ResourceNotFoundException;
+import com.example.hive.repository.EscrowWalletRepository;
 import com.example.hive.repository.TaskRepository;
 import com.example.hive.repository.UserRepository;
 import com.example.hive.service.TaskService;
@@ -33,6 +38,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
+    private final EscrowWalletRepository escrowWalletRepository;
+    private final PaymentLogRepository paymentLogRepository;
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
@@ -49,6 +56,14 @@ public class TaskServiceImpl implements TaskService {
             throw new RuntimeException("User is not a TASKER");
         }
 
+//       check if task has been paid for , if yes create an escrow wallet
+        PaymentLog paymentLog = paymentLogRepository.findById(taskDto.getPaymentLogId())
+                .orElseThrow( () -> new ResourceNotFoundException("Payment Reference not found"));
+
+         validateTaskRequest(taskDto, paymentLog);
+
+        EscrowWallet escrowWallet = createAndSaveEscrowWallet(paymentLog);
+
         Task task = Task.builder()
                 .jobType(taskDto.getJobType())
                 .taskDescription(taskDto.getTaskDescription())
@@ -58,19 +73,23 @@ public class TaskServiceImpl implements TaskService {
                 .budgetRate(taskDto.getBudgetRate())
                 .estimatedTime(taskDto.getEstimatedTime())
                 .tasker(user)
-                .status(taskDto.getStatus())
+                .escrowWallet(escrowWallet)
+                .status(Status.NEW)
                 .build();
 
         Task savedTask = taskRepository.save(task);
+        paymentLog.setHasBeenUsedToCreateTask(true);
+        escrowWallet.setTask(savedTask);
+        escrowWalletRepository.save(escrowWallet);
         eventPublisher.publishEvent(new TaskCreatedEvent(user, savedTask, applicationUrl(request)));
 
         return AppResponse.buildSuccess(mapToDto(savedTask));
     }
 
 
-
     @Override
     public AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto, Principal principal) {
+        // TODO This method is meant to update doer and Status? or rather insensitive details?
         // Check if the user has the DOER role
         String emailOfDoer = principal.getName();
 
@@ -87,7 +106,6 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
         // Update the status of the task
-        task.setStatus(taskDto.getStatus());
         task.setDoer(doer);
 
         Task updatedTask = taskRepository.save(task);
@@ -135,8 +153,6 @@ public class TaskServiceImpl implements TaskService {
 
     }
 
-
-
     public TaskResponseDto mapToDto(Task task) {
 
         return TaskResponseDto.builder()
@@ -146,7 +162,7 @@ public class TaskServiceImpl implements TaskService {
                 .taskDeliveryAddress(task.getTaskDeliveryAddress())
                 .taskDuration(task.getTaskDuration().toString())
                 .budgetRate(task.getBudgetRate())
-                .tasker_id(task.getTask_id().toString())
+                .taskId(task.getTask_id().toString())
                 .estimatedTime(task.getEstimatedTime())
                 .status(task.getStatus())
                 .build();
@@ -190,6 +206,33 @@ public class TaskServiceImpl implements TaskService {
             return true;
         }
         return false;
+    }
+
+    private EscrowWallet createAndSaveEscrowWallet(PaymentLog paymentLog) {
+
+
+        EscrowWallet escrowWallet = new EscrowWallet();
+
+        escrowWallet.setEscrowAmount(paymentLog.getAmount());
+
+        escrowWalletRepository.save(escrowWallet);
+
+        return escrowWallet;
+
+    }
+
+    private static void validateTaskRequest(TaskDto taskDto, PaymentLog paymentLog) {
+        if (!paymentLog.getTransactionStatus().equals(TransactionStatus.SUCCESS))
+            throw new BadRequestException("Payment was not successful");
+
+        if (paymentLog.getHasBeenUsedToCreateTask()) {
+            throw new BadRequestException("Payment has been used to create a task");
+        }
+
+        log.info("paymentlog {} and taskdto {}", paymentLog.getAmount(), taskDto.getBudgetRate());
+
+        if (paymentLog.getAmount().compareTo(taskDto.getBudgetRate())!=0)
+            throw new BadRequestException("Wrong amount set in Task Budget Rate");
     }
 }
 

@@ -134,7 +134,6 @@ public class TaskController {
 
     }
 
-
     @GetMapping("/search")
     public ResponseEntity<List<TaskResponseDto>> searchTasks(
             @RequestParam(value = "text") String text,

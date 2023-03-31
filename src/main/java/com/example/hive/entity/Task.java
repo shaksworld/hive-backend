@@ -45,6 +45,8 @@ public class Task extends AuditEntity {
     private Boolean isPaidFor = false;
     @OneToOne
     private TransactionLog transactionLog;
+    @OneToOne
+    private EscrowWallet escrowWallet;
 
 
 }

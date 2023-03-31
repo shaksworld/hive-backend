@@ -1,6 +1,5 @@
 package com.example.hive.entity;
 
-
 import com.example.hive.constant.TransactionStatus;
 import com.example.hive.constant.TransactionType;
 import jakarta.persistence.*;
@@ -9,31 +8,23 @@ import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 
-
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @SuperBuilder
 @AllArgsConstructor
-@Table(name = "transactions")
-public class TransactionLog extends AuditEntity {
-
+public class PaymentLog extends AuditEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String transactionId;
+    private String paymentLogId;
 
     @Column(name = "amount")
     private BigDecimal amount;
 
-    @Enumerated(value = EnumType.STRING)
-    @Column(name = "transaction_type", length = 20)
-    private TransactionType transactionType;
-
-
     @Column(name = "transaction_reference")
-    private String paystackReference;
+    private String transactionReference;
 
     @Column(name = "transaction_date")
     private String transactionDate;
@@ -43,8 +34,8 @@ public class TransactionLog extends AuditEntity {
     @Builder.Default
     private TransactionStatus transactionStatus = TransactionStatus.PENDING;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
-    private User doerWithdrawer;
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    private User taskerDepositor;
 
-
+    private Boolean hasBeenUsedToCreateTask = false;
 }
