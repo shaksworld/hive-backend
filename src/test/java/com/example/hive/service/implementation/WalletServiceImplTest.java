@@ -91,8 +91,6 @@ class WalletServiceImplTest {
         transactionLog.setTransactionId(UUID.randomUUID().toString());
         transactionLog.setTransactionType(TransactionType.DEPOSIT);
         transactionLog.setDoerWithdrawer(doer);
-        transactionLog.setTaskerDepositor(tasker);
-        transactionLog.setTask(task);
         transactionLog.setAmount(new BigDecimal("100.00"));
     }
 
