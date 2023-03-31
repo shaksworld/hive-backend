@@ -9,5 +9,4 @@ import java.util.UUID;
 
 @Repository
 public interface TransactionLogRepository extends JpaRepository<TransactionLog, String> {
-    Optional<TransactionLog> findByPaystackReference(String reference);
 }

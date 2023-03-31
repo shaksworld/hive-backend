@@ -4,19 +4,18 @@ import com.example.hive.constant.TransactionStatus;
 import com.example.hive.dto.request.TaskDto;
 import com.example.hive.dto.response.AppResponse;
 import com.example.hive.dto.response.TaskResponseDto;
-import com.example.hive.entity.EscrowWallet;
-import com.example.hive.entity.PaymentLog;
-import com.example.hive.entity.Task;
-import com.example.hive.entity.User;
+import com.example.hive.entity.*;
 import com.example.hive.enums.Role;
 import com.example.hive.enums.Status;
 import com.example.hive.exceptions.BadRequestException;
 import com.example.hive.exceptions.CustomException;
 import com.example.hive.exceptions.ResourceNotFoundException;
 import com.example.hive.repository.EscrowWalletRepository;
+import com.example.hive.repository.PaymentLogRepository;
 import com.example.hive.repository.TaskRepository;
 import com.example.hive.repository.UserRepository;
 import com.example.hive.service.TaskService;
+import com.example.hive.service.WalletService;
 import com.example.hive.utils.event.TaskCreatedEvent;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +42,7 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final WalletService walletService;
     private final ApplicationEventPublisher eventPublisher;
 
 
@@ -73,6 +73,7 @@ public class TaskServiceImpl implements TaskService {
                 .budgetRate(taskDto.getBudgetRate())
                 .estimatedTime(taskDto.getEstimatedTime())
                 .tasker(user)
+                .isEscrowTransferComplete(false)
                 .escrowWallet(escrowWallet)
                 .status(Status.NEW)
                 .build();
@@ -192,6 +193,8 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskResponseDto acceptTask(User user, String taskId) {
         Task tasKToUpdate = taskRepository.findById(UUID.fromString(taskId)).orElseThrow(() -> new ResourceNotFoundException("task can not be found"));
+        if (!user.getRole().equals(Role.DOER)) throw new BadRequestException("User is not a doer");
+
         if (isTaskAccepted(tasKToUpdate)) {
             tasKToUpdate.setDoer(user);
             tasKToUpdate.setStatus(Status.ONGOING);
@@ -201,11 +204,70 @@ public class TaskServiceImpl implements TaskService {
         throw new CustomException("Task not available", HttpStatus.BAD_REQUEST);
     }
 
-    public boolean isTaskAccepted(Task task) {
-        if (task.getStatus().equals(Status.NEW)) {
-            return true;
+    @Override
+    public TaskResponseDto doerCompletesTask(User doer, String taskId) {
+        Task tasKToUpdate = taskRepository.findById(UUID.fromString(taskId)).orElseThrow(() -> new ResourceNotFoundException("task can not be found"));
+
+        //check if doer is the same as the doer associated with the task
+        if (isTaskOngoing(tasKToUpdate) && isDoerTheSameAsInTheTask(tasKToUpdate,doer)) {
+            tasKToUpdate.setStatus(Status.PENDING_APPROVAL);
+            Task updatedTask = taskRepository.save(tasKToUpdate);
+            return modelMapper.map(updatedTask, TaskResponseDto.class);
         }
-        return false;
+        throw new BadRequestException("Something Went wrong");
+    }
+
+    @Override
+    public TaskResponseDto taskerApprovesCompletedTask(User tasker, String taskId) {
+        Task tasKToUpdate = taskRepository.findById(UUID.fromString(taskId)).orElseThrow(() -> new ResourceNotFoundException("task can not be found"));
+
+        //check if tasker is the same as the tasker associated with the task
+        if (isTaskPendingApproval(tasKToUpdate) && isTaskerTheOwnerOfTask(tasKToUpdate,tasker)) {
+            tasKToUpdate.setStatus(Status.COMPLETED);
+
+            //transfer funds to the doer
+            EscrowWallet escrowWallet = tasKToUpdate.getEscrowWallet();
+
+            User doer = tasKToUpdate.getDoer();
+
+            creditTheDoerWalletFromEscrowWallet(escrowWallet,doer,tasKToUpdate);
+
+          //  deleteEscrowWallet and update task
+            tasKToUpdate.setIsEscrowTransferComplete(true);
+
+            Task updatedTask = taskRepository.save(tasKToUpdate);
+            return modelMapper.map(updatedTask, TaskResponseDto.class);
+        }
+        throw new BadRequestException("Something Went wrong");
+    }
+
+    private void creditTheDoerWalletFromEscrowWallet(EscrowWallet escrowWallet, User doer, Task task) {
+
+        //check if the task has been paid for
+
+        if (task.getIsEscrowTransferComplete()){throw new BadRequestException("The task has been paid for ");}
+
+        walletService.creditDoerWallet(doer, escrowWallet.getEscrowAmount());
+    }
+
+    private boolean isTaskPendingApproval(Task tasK) {
+        return tasK.getStatus().equals(Status.PENDING_APPROVAL);
+    }
+
+    private boolean isTaskerTheOwnerOfTask(Task task, User tasker) {
+        return task.getTasker().equals(tasker);
+    }
+
+    private boolean isDoerTheSameAsInTheTask(Task task, User doer) {
+        return task.getDoer().equals(doer);
+    }
+
+    private boolean isTaskAccepted(Task task) {
+        return task.getStatus().equals(Status.NEW);
+    }
+
+    private boolean isTaskOngoing(Task task) {
+        return task.getStatus().equals(Status.ONGOING);
     }
 
     private EscrowWallet createAndSaveEscrowWallet(PaymentLog paymentLog) {

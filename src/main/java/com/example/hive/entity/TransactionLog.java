@@ -32,19 +32,15 @@ public class TransactionLog extends AuditEntity {
     private TransactionType transactionType;
 
 
-    @Column(name = "transaction_reference")
-    private String paystackReference;
-
     @Column(name = "transaction_date")
     private String transactionDate;
 
     @Enumerated(value = EnumType.STRING)
     @Column(name = "transaction_status", length = 50)
-    @Builder.Default
-    private TransactionStatus transactionStatus = TransactionStatus.PENDING;
+    private TransactionStatus transactionStatus;
 
     @ManyToOne(cascade = CascadeType.MERGE)
-    private User doerWithdrawer;
+    private User doer;
 
 
 }
