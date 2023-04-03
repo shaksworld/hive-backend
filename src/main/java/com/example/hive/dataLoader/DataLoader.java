@@ -30,6 +30,7 @@ public class DataLoader {
         this.taskRepository = taskRepository;
     }
     @PostConstruct
+
     public void loadUserData() {
         // Create an address for the user and task
         Address address1 = new Address();
@@ -165,12 +166,23 @@ public class DataLoader {
         user6.setRole(Role.DOER);
         user6.setAddress(address6);
 
+        User user7 = new User();
+        user6.setUser_id(UUID.randomUUID());
+        user6.setFullName("Stephen");
+        user6.setEmail("stevol2015@gmail.com");
+        user6.setPhoneNumber("07025090220");
+        user6.setValidId(String.valueOf(6));
+        user6.setPassword("Thastr@123");
+        user6.setIsVerified(true);
+        user6.setRole(Role.TASKER);
+        user6.setAddress(address6);
 
-        List<User> users = List.of(user,user2,user3,user4,user5,user6);
+
+        List<User> users = List.of(user,user2,user3,user4,user5,user6,user7);
 
         for (User u: users){
             if (userRepository.findByEmail(u.getEmail()).isEmpty()) {
-                userRepository.save(u);
+//                userRepository.save(u);
             }
         }
 
@@ -258,18 +270,18 @@ public class DataLoader {
         task8.setStatus(Status.NEW);
 
 
-        User tasker1 = userRepository.findByEmail(user.getEmail()).get();
-        User doer = userRepository.findByEmail(user6.getEmail()).get();
+        User tasker1 = userRepository.findByEmail(user.getEmail()).orElse(null);
+        User doer = userRepository.findByEmail(user6.getEmail()).orElse(null);
         task1.setTasker(tasker1);
         task1.setDoer(doer);
 
-        User tasker2 = userRepository.findByEmail(user3.getEmail()).get();
-        User doer2 = userRepository.findByEmail(user5.getEmail()).get();
+        User tasker2 = userRepository.findByEmail(user3.getEmail()).orElse(null);
+        User doer2 = userRepository.findByEmail(user5.getEmail()).orElse(null);
         task3.setTasker(tasker2);
         task3.setDoer(doer2);
 
-        User tasker3 = userRepository.findByEmail(user2.getEmail()).get();
-        User doer3 = userRepository.findByEmail(user4.getEmail()).get();
+        User tasker3 = userRepository.findByEmail(user2.getEmail()).orElse(null);
+        User doer3 = userRepository.findByEmail(user4.getEmail()).orElse(null);
         task4.setTasker(tasker3);
         task4.setDoer(doer3);
 

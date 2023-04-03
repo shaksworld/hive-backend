@@ -1,10 +1,11 @@
 package com.example.hive.service;
 
-import com.example.hive.dto.Request.BankTransferDto;
-import com.example.hive.dto.Request.PayStackPaymentRequest;
-import com.example.hive.dto.Request.ValidateAccountDto;
+import com.example.hive.dto.request.BankTransferDto;
+import com.example.hive.dto.request.PayStackPaymentRequest;
+import com.example.hive.dto.request.ValidateAccountDto;
 import com.example.hive.dto.response.*;
 import com.example.hive.entity.User;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -17,11 +18,9 @@ public interface PayStackService {
 
     VerifyTransactionResponse verifyPayment(String reference) throws IOException;
 
-    List<ListBanksResponse> fetchBanks();
+    List<ListBanksResponse> fetchBanks(String provider);
 
-    ValidateAccountResponse validateBankAccount(ValidateAccountDto validateAccountDto, String bankName);
+    Mono<TransactionResponse> transferFunds(BankTransferDto dto, String provider) throws InterruptedException;
 
-    TransferResponse transferFunds(BankTransferDto bankTransferDto , User user);
 
-    Optional<String> getTransactionStatusValue(String transactionReference);
 }

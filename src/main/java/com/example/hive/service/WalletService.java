@@ -1,21 +1,19 @@
 package com.example.hive.service;
-import com.example.hive.dto.Request.BankTransferDto;
-import com.example.hive.dto.Request.WithdrawFundRequestDto;
+import com.example.hive.dto.request.BankTransferDto;
 import com.example.hive.dto.response.TransferResponse;
-import com.example.hive.dto.response.WithdrawFundResponseDto;
-import com.example.hive.security.config.CustomUserDetails;
 import com.example.hive.entity.TransactionLog;
-import com.example.hive.entity.User;
 
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.util.UUID;
 
 public interface WalletService {
 
 
-    boolean creditDoerWallet(User user, BigDecimal creditAmount, TransactionLog transactionLog);
 
-    TransferResponse makeWithdrawalFromWallet(BankTransferDto bankTransferDto, Principal principal);
+    boolean creditDoerWallet(UUID doerId, BigDecimal creditAmount, TransactionLog transactionLog);
 
-    String verifyTransaction(String reference);
+//    TransferResponse makeWithdrawalFromWallet(BankTransferDto bankTransferDto, Principal principal);
+//
+//    String verifyTransaction(String reference);
 }

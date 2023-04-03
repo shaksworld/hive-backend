@@ -1,24 +1,27 @@
-package com.example.hive.dto.Request;
+package com.example.hive.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
-import lombok.Value;
+import lombok.*;
 
 import java.math.BigDecimal;
 
-@Value
+@Data
+@RequiredArgsConstructor
 public class BankTransferDto {
+
     @Positive
-    BigDecimal amount = BigDecimal.ZERO;
+    private  BigDecimal amount;
     @NotEmpty
-    String currencyCode = "NGN";
+    private  String currencyCode;
     @NotEmpty
-    String narration;
+    private  String narration;
     @NotEmpty
-    String beneficiaryAccountNumber;
+    private  String beneficiaryAccountNumber;
     String beneficiaryAccountName;
     @NotEmpty
-    String beneficiaryBankCode;
+    private  String beneficiaryBankCode;
     String transactionReference;
     int maxRetryAttempt = 0;
     String callBackUrl;

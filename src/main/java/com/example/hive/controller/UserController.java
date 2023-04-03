@@ -1,6 +1,6 @@
 package com.example.hive.controller;
 
-import com.example.hive.dto.Request.ForgetPasswordDto;
+import com.example.hive.dto.request.ForgetPasswordDto;
 import com.example.hive.dto.request.ResetPasswordDto;
 import com.example.hive.dto.response.AppResponse;
 import com.example.hive.entity.User;

@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 import com.example.hive.entity.User;
 import com.example.hive.enums.Role;
 import com.example.hive.exceptions.CustomException;
+import com.example.hive.repository.AddressRepository;
 import com.example.hive.repository.UserRepository;
+import com.example.hive.repository.VerificationTokenRepository;
 import com.example.hive.service.UserService;
 import com.example.hive.utils.RegistrationCompleteEvent;
 import lombok.RequiredArgsConstructor;
@@ -98,7 +100,9 @@ public class UserServiceImpl implements UserService {
         addressRepository.save(address);
 
         BeanUtils.copyProperties(registrationRequestDto, newUser);
+        log.info("user has a role of {}",registrationRequestDto.getRole().toString());
         newUser.addRole(role);
+        log.info("user now has a role of {}",newUser.getRoles().toString());
         newUser.setPassword(passwordEncoder.encode(registrationRequestDto.getPassword()));
 
 

@@ -13,20 +13,20 @@ import java.net.http.HttpClient;
 @RequiredArgsConstructor
 public class BeanConfig {
 
-    @Bean
-    public HttpClient httpClient(){
-        return HttpClient.newHttpClient();
-    }
+//    @Bean
+//    public HttpClient httpClient(){
+//        return HttpClient.newHttpClient();
+//    }
+//
+//    @Bean
+//    public Gson gson(){
+//        return new Gson();
+//    }
 
-    @Bean
-    public Gson gson(){
-        return new Gson();
-    }
-
-    @Bean
-    public WebClientHandler webClientHandler(){
-        return new WebClientHandler(httpClient(), gson());
-    }
+//    @Bean
+//    public WebClientHandler webClientHandler(){
+//        return new WebClientHandler(httpClient(), gson());
+//    }
 
 
 }

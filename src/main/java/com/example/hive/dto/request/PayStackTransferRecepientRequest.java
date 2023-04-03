@@ -1,4 +1,4 @@
-package com.example.hive.dto.Request;
+package com.example.hive.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;

@@ -5,10 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
@@ -17,7 +14,7 @@ import java.util.UUID;
 @Entity
 public class User extends AuditEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID user_id;
     @Column(name = "full_name")
     private String fullName;
@@ -39,6 +36,11 @@ public class User extends AuditEntity {
     private List<Task> task;
     @OneToOne
     private Wallet wallet;
+
+
+    @OneToMany(mappedBy = "user")
+    private List<Notification> notificationList = new ArrayList<>();
+
 
 
     public void addRole(Role role) {

@@ -1,22 +1,21 @@
 package com.example.hive.dto.response;
 
 import com.example.hive.entity.Task;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 
-@Data
+
 @Builder
+@Data
 @RequiredArgsConstructor
 public class ApiResponse<T> {
     private HttpStatus statusCode;
     private String message;
     private T data;
     private String time = LocalDateTime.now().toString();
+
 
     public ApiResponse(HttpStatus statusCode, String message, T data, String time) {
         this.statusCode = statusCode;

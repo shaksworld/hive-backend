@@ -1,4 +1,4 @@
-package com.example.hive.dto.Request;
+package com.example.hive.dto.request;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Value;
