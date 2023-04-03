@@ -8,6 +8,7 @@ import com.example.hive.dto.request.PayStackTransferRequest;
 import com.example.hive.dto.response.*;
 import com.example.hive.entity.User;
 import com.example.hive.exceptions.CustomException;
+import com.example.hive.repository.UserRepository;
 import com.example.hive.service.EmailService;
 import com.example.hive.service.PayStackService;
 import com.example.hive.utils.AuthDetails;
@@ -24,9 +25,12 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.protocol.HTTP;
 import org.apache.tomcat.websocket.AuthenticationException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -38,6 +42,7 @@ import java.io.InputStreamReader;
 import java.security.Principal;
 import java.time.Duration;
 import java.util.List;
+
 
 @Service
 @Slf4j
@@ -54,7 +59,6 @@ public class PayStackImpl implements PayStackService {
     private final EmailService emailService;
     private final PayStackClient payStack;
     private final Gson gson;
-
 
 
     @Override
@@ -112,7 +116,6 @@ public class PayStackImpl implements PayStackService {
     @Override
     public VerifyTransactionResponse verifyPayment(String reference) {
 
-
         VerifyTransactionResponse payStackResponse;
         try {
             HttpClient client = HttpClientBuilder.create().build();
@@ -137,10 +140,6 @@ public class PayStackImpl implements PayStackService {
 
             payStackResponse = mapper.readValue(result.toString(), VerifyTransactionResponse.class);
 
-//            walletService.fundWallet(email, payStackResponse, "My new wallet",
-//                    "Wallet funded from payStack");
-
-//            paymentTracker.remove(reference);
 
         } catch (Exception e) {
             throw new CustomException(e.getMessage());

@@ -4,28 +4,26 @@ package com.example.hive.service.implementation;
 import com.example.hive.dto.request.UserRegistrationRequestDto;
 import com.example.hive.dto.response.UserRegistrationResponseDto;
 import com.example.hive.entity.*;
+import com.example.hive.exceptions.ResourceNotFoundException;
 import com.example.hive.repository.*;
 import com.example.hive.service.UserService;
-import com.example.hive.service.WalletService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.example.hive.entity.User;
 import com.example.hive.enums.Role;
 import com.example.hive.exceptions.CustomException;
-import com.example.hive.repository.AddressRepository;
 import com.example.hive.repository.UserRepository;
-import com.example.hive.repository.VerificationTokenRepository;
-import com.example.hive.service.UserService;
-import com.example.hive.utils.RegistrationCompleteEvent;
-import lombok.RequiredArgsConstructor;
+import com.example.hive.utils.event.RegistrationCompleteEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.security.Principal;
 import java.util.Optional;
 import java.util.Calendar;
 import java.util.Date;
@@ -49,10 +47,6 @@ public class UserServiceImpl implements UserService {
     private final WalletRepository walletRepository;
     private final ModelMapper modelMapper;
 
-    private final String verificationUrl = "http://localhost:9090/auth";
-
-
-
     @Override
     public Optional<User> findUserByEmail(String email) {
         return userRepository.findByEmail(email);
@@ -68,7 +62,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserRegistrationResponseDto registerUser(UserRegistrationRequestDto registrationRequestDto) {
+    public UserRegistrationResponseDto registerUser(UserRegistrationRequestDto registrationRequestDto, HttpServletRequest request) {
         log.info("register user and create account");
 
         if (doesUserAlreadyExist(registrationRequestDto.getEmail())) {
@@ -81,7 +75,7 @@ public class UserServiceImpl implements UserService {
 
         // generateToken and Save to token repo, send email also
         eventPublisher.publishEvent(new RegistrationCompleteEvent(
-                newUser,verificationUrl
+                newUser,getVerificationUrl(request)
         ));
         return modelMapper.map(newUser, UserRegistrationResponseDto.class);
     }
@@ -91,24 +85,6 @@ public class UserServiceImpl implements UserService {
         newWallet.setUser(newUser);
         walletRepository.save(newWallet);
     }
-
-
-    private User saveNewUser(UserRegistrationRequestDto registrationRequestDto) {
-        User newUser = new User();
-        Role role = registrationRequestDto.getRole();
-        Address address = registrationRequestDto.getAddress();
-        addressRepository.save(address);
-
-        BeanUtils.copyProperties(registrationRequestDto, newUser);
-        log.info("user has a role of {}",registrationRequestDto.getRole().toString());
-        newUser.addRole(role);
-        log.info("user now has a role of {}",newUser.getRoles().toString());
-        newUser.setPassword(passwordEncoder.encode(registrationRequestDto.getPassword()));
-
-
-        return userRepository.save(newUser);
-    }
-
 
     private boolean doesUserAlreadyExist(String email) {
         return userRepository.findByEmail(email).isPresent();
@@ -144,12 +120,6 @@ public class UserServiceImpl implements UserService {
         return status;
     }
 
-    private void activateWallet(User user) {
-        Wallet wallet = walletRepository.findByUser(user).orElseThrow( () -> new CustomException("User does not have a wallet"));
-        wallet.setActivated(true);
-        walletRepository.save(wallet);
-    }
-
     @Override
     public  String generateVerificationToken(User user) {
         log.info("inside generateVerificationToken, generating token for {}", user.getEmail());
@@ -166,8 +136,9 @@ public class UserServiceImpl implements UserService {
         return token;
     }
     @Override
-    public VerificationToken generateNewToken(String oldToken) {
-        VerificationToken verificationToken = verificationTokenRepository.findByToken(oldToken)
+    public VerificationToken generateNewToken(User user) {
+        // does the user have a saved (old)token?
+        VerificationToken verificationToken = verificationTokenRepository.findByUser(user)
                 .orElseThrow(() -> new CustomException("Token does not Exist", HttpStatus.BAD_REQUEST));
         verificationToken.setToken(UUID.randomUUID().toString());
         Date currentDate = new Date();
@@ -176,5 +147,30 @@ public class UserServiceImpl implements UserService {
         verificationTokenRepository.save(verificationToken);
         return verificationToken;
     }
+    //HELPER METHODS
 
+    private User saveNewUser(UserRegistrationRequestDto registrationRequestDto) {
+        User newUser = new User();
+        Role role = registrationRequestDto.getRole();
+        Address address = registrationRequestDto.getAddress();
+        addressRepository.save(address);
+
+        BeanUtils.copyProperties(registrationRequestDto, newUser);
+        log.info("user has a role of {}",registrationRequestDto.getRole().toString());
+        newUser.addRole(role);
+        log.info("user now has a role of {}",newUser.getRoles().toString());
+        newUser.setPassword(passwordEncoder.encode(registrationRequestDto.getPassword()));
+
+
+        return userRepository.save(newUser);
+    }
+    private void activateWallet(User user) {
+        Wallet wallet = walletRepository.findByUser(user).orElseThrow( () -> new CustomException("User does not have a wallet"));
+        wallet.setActivated(true);
+        walletRepository.save(wallet);
+    }
+
+    private static String getVerificationUrl(HttpServletRequest request) {
+        return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/auth";
+    }
 }

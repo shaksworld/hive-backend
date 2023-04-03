@@ -9,11 +9,17 @@ import com.example.hive.exceptions.CustomException;
 import com.example.hive.repository.NotificationRepository;
 import com.example.hive.repository.UserRepository;
 import com.example.hive.service.NotificationService;
+import com.example.hive.utils.EpochTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -39,7 +45,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .user(tasker)
                 .title("Task Created " + "-> " + task.getJobType())
                 .body("Your task has been successfully created, kindly await an acceptance")
-                .createdAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now().toString())
                 .build();
         
         Notification savedNotification = notificationRepository.save(notification);
@@ -59,7 +65,7 @@ public class NotificationServiceImpl implements NotificationService {
         Notification notification = Notification.builder()
                 .user(doer)
                 .title("Task Acceptance!!!")
-                .createdAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now().toString())
                 .body("Congratulations! You have successfully accepted a task with the following details: \n"
                         + "Task type: " + task.getJobType() + "\n"
                         + "Task description: " + task.getTaskDescription() + "\n"
@@ -86,7 +92,7 @@ public class NotificationServiceImpl implements NotificationService {
         Notification notification = Notification.builder()
                 .user(tasker)
                 .title("Task Accepted!")
-                .createdAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now().toString())
                 .body("Congratulations! Your task has been successfully accepted by " + task.getDoer().getFullName() + "\n"
                         + "Task Details: \n"
                         + "Task type: " + task.getJobType() + "\n"
@@ -98,6 +104,7 @@ public class NotificationServiceImpl implements NotificationService {
         Notification savedNotification = notificationRepository.save(notification);
         return mapToNotificationResponse(savedNotification);
     }
+
 
     public NotificationResponseDto walletFundingNotification(Task task) {
         log.info("Sending Wallet Funding Notification to user Doer {} ", task.getTasker().getFullName());
@@ -112,7 +119,7 @@ public class NotificationServiceImpl implements NotificationService {
         Notification notification = Notification.builder()
                 .user(doer)
                 .title("Wallet Funded!")
-                .createdAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now().toString())
                 .body("Congratulations! Your wallet has been successfully funded by " + task.getDoer().getFullName() + "\n"
                         + "Thank you for using Hive!")
                 .build();
@@ -121,8 +128,27 @@ public class NotificationServiceImpl implements NotificationService {
         return mapToNotificationResponse(savedNotification);
     }
 
+    @Override
+    public List<NotificationResponseDto> getAllNotificationOfUser(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> {
+            throw new CustomException("User with the email: " + email + " was not found");
+        });
+        List<Notification> notifications = notificationRepository.findNotificationsByUserOrderByCreatedAtDesc(user);
+        List<NotificationResponseDto> notificationResponseDtos = new ArrayList<>();
+
+        for(Notification notification : notifications) {
+            NotificationResponseDto notificationResponseDto = new ModelMapper().map(notification, NotificationResponseDto.class);
+            notificationResponseDto.setUserId(user.getUser_id().toString());
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
+            LocalDateTime datetime = LocalDateTime.parse(notification.getCreatedAt(), formatter);
 
 
+            notificationResponseDto.setElapsedTime(EpochTime.getElapsedTime(datetime));
+            notificationResponseDtos.add(notificationResponseDto);
+        }
+        return notificationResponseDtos;
+    }
 
     private NotificationResponseDto mapToNotificationResponse(Notification notification) {
         return NotificationResponseDto.builder()

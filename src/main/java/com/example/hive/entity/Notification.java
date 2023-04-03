@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -23,7 +22,7 @@ public class Notification {
 
     private String body;
 
-    private LocalDateTime createdAt;
+    private String createdAt;
 
     @JsonBackReference
     @ManyToOne
