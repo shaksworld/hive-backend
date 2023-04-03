@@ -80,6 +80,15 @@ public class UserServiceImpl implements UserService {
         return modelMapper.map(newUser, UserRegistrationResponseDto.class);
     }
 
+    private void createWalletAccount(User newUser) {
+        Wallet newWallet = new Wallet();
+        newWallet.setUser(newUser);
+        walletRepository.save(newWallet);
+    }
+
+    private boolean doesUserAlreadyExist(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
 
     @Override
     public Boolean validateRegistrationToken(String token) {
@@ -138,8 +147,6 @@ public class UserServiceImpl implements UserService {
         verificationTokenRepository.save(verificationToken);
         return verificationToken;
     }
-
-
     //HELPER METHODS
 
     private User saveNewUser(UserRegistrationRequestDto registrationRequestDto) {
@@ -157,19 +164,10 @@ public class UserServiceImpl implements UserService {
 
         return userRepository.save(newUser);
     }
-    private boolean doesUserAlreadyExist(String email) {
-        return userRepository.findByEmail(email).isPresent();
-    }
     private void activateWallet(User user) {
         Wallet wallet = walletRepository.findByUser(user).orElseThrow( () -> new CustomException("User does not have a wallet"));
         wallet.setActivated(true);
         walletRepository.save(wallet);
-    }
-
-    private void createWalletAccount(User newUser) {
-        Wallet newWallet = new Wallet();
-        newWallet.setUser(newUser);
-        walletRepository.save(newWallet);
     }
 
     private static String getVerificationUrl(HttpServletRequest request) {
