@@ -2,6 +2,7 @@ package com.example.hive.service.implementation;
 
 import com.example.hive.constant.TransactionStatus;
 import com.example.hive.constant.TransactionType;
+import com.example.hive.dto.response.WalletResponseDto;
 import com.example.hive.entity.TransactionLog;
 import com.example.hive.entity.User;
 import com.example.hive.entity.Wallet;
@@ -18,6 +19,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.util.UUID;
 
 @Log4j2
@@ -63,10 +65,14 @@ public class WalletServiceImpl implements WalletService {
 
     }
 
+    @Override
+    public WalletResponseDto getWalletByUser(Principal principal) {
 
-
-
-
+        //get the user from the princial
+        User doer = userRepository.findByEmail(principal.getName()).get();
+        Wallet getWallet = walletRepository.findByUser(doer).orElseThrow(() -> new RuntimeException("Wallet not found"));
+        return new WalletResponseDto(getWallet.getAccountBalance());
+    }
 
 
 }
