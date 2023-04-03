@@ -8,6 +8,6 @@ import java.util.UUID;
 
 public interface WalletService {
 
-    boolean creditDoerWallet(UUID doerId, BigDecimal creditAmount, TransactionLog transactionLog);
+    boolean creditDoerWallet(User doer, BigDecimal creditAmount);
 
 }
