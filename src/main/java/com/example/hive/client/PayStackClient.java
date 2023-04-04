@@ -3,17 +3,13 @@ package com.example.hive.client;
 import com.example.hive.constant.AppConstants;
 import com.example.hive.dto.request.PayStackTransferRecepientRequest;
 import com.example.hive.dto.request.PayStackTransferRequest;
-import com.example.hive.dto.response.ApiResponse;
 import com.example.hive.dto.response.TransactionResponse;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.annotation.PostExchange;
 import reactor.core.publisher.Flux;
-
-import static com.example.hive.constant.AppConstants.PAY_STACK_SECRET_KEY;
 
 @HttpExchange
 public interface PayStackClient {

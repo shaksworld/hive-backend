@@ -11,6 +11,7 @@ import com.example.hive.exceptions.CustomException;
 import com.example.hive.repository.UserRepository;
 import com.example.hive.service.EmailService;
 import com.example.hive.service.PayStackService;
+import com.example.hive.service.WalletService;
 import com.example.hive.utils.AuthDetails;
 import com.example.hive.utils.EmailTemplates;
 import com.example.hive.utils.TransactionUtil;
@@ -58,6 +59,7 @@ public class PayStackImpl implements PayStackService {
     private final AuthDetails authDetails;
     private final EmailService emailService;
     private final PayStackClient payStack;
+    private final WalletService walletService;
     private final Gson gson;
 
 
@@ -159,22 +161,28 @@ public class PayStackImpl implements PayStackService {
         }.getType());
     }
     @Override
-    public Mono<TransactionResponse> transferFunds(BankTransferDto dto, String provider) throws InterruptedException {
+    public Mono<TransactionResponse> transferFunds(BankTransferDto dto, String provider, User user) throws InterruptedException {
 
         Flux<TransactionResponse> responseFlux;
 
-        switch (provider.toLowerCase()) {
-            case "paystack" -> {
-                PayStackTransferRequest req = buildPayStackTransferRequest(dto, getRecipientCode(dto));
-                log.info("PayStack Transfer req: {}", req);
-                responseFlux = payStack.transferFunds(req, "Bearer " + PAY_STACK_SECRET_KEY);
-            }
+        try {
+            switch (provider.toLowerCase()) {
+                case "paystack" -> {
+                    PayStackTransferRequest req = buildPayStackTransferRequest(dto, getRecipientCode(dto));
+                    log.info("PayStack Transfer req: {}", req);
+                    responseFlux = payStack.transferFunds(req, "Bearer " + PAY_STACK_SECRET_KEY);
+                }
 
-            default -> throw new IllegalArgumentException("Invalid provider");
-        }
+                default -> throw new IllegalArgumentException("Invalid provider");
+            }
+        } catch (Exception e) {
+            throw new CustomException(e.getMessage());}
+
+        walletService.withdrawFromWalletBalance(user, dto.getAmount());
 
         return responseFlux.doOnNext(res -> log.info("res: {}", res))
-                .next();
+                    .next();
+
     }
 
     private String getRecipientCode(BankTransferDto dto) {
@@ -202,13 +210,6 @@ public class PayStackImpl implements PayStackService {
                 .build();
     }
 
-
-
-
-
-
-
-    // create a method for getting banks
 
 
 

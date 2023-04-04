@@ -1,7 +1,5 @@
 package com.example.hive.constant;
 
-import org.springframework.beans.factory.annotation.Value;
-
 public class AppConstants {
 
     public static final String DEFAULT_PAGE_NUMBER = "0";

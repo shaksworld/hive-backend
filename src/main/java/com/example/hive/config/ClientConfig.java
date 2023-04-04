@@ -19,8 +19,6 @@ public class ClientConfig {
     @Value("${secret.key}")
     private  String PAY_STACK_SECRET_KEY;
 
-   // private final List<ConnectionFactory> factories;
-
     @Bean
     public PayStackClient payStackClient(){
 

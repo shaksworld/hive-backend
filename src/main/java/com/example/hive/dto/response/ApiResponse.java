@@ -1,7 +1,8 @@
 package com.example.hive.dto.response;
 
-import com.example.hive.entity.Task;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;

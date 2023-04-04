@@ -63,10 +63,21 @@ public class WalletServiceImpl implements WalletService {
 
     }
 
-
-
-
-
+    @Override
+    public void withdrawFromWalletBalance(User user, BigDecimal amount) {
+        Wallet wallet = walletRepository.findByUser(user).orElseThrow(() -> new CustomException("User does not have a wallet"));
+        if (wallet.getAccountBalance().compareTo(amount) < 0) {
+            throw new CustomException("Insufficient funds");
+        }
+        wallet.setAccountBalance(wallet.getAccountBalance().subtract(amount));
+        walletRepository.save(wallet);
+        TransactionLog transactionLog = new TransactionLog();
+        transactionLog.setAmount(amount);
+        transactionLog.setDoer(user);
+        transactionLog.setTransactionType(TransactionType.WITHDRAW);
+        transactionLog.setTransactionStatus(TransactionStatus.SUCCESS);
+        transactionLogRepository.save(transactionLog);
+    }
 
 
 }
