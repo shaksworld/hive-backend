@@ -46,11 +46,13 @@ public class HiveSecurityConfig {
                         "/actuator/**",
                         "/swagger-resources/**",
                         "/swagger-ui.html",
-                        "/user/**",
+                        "/api/v1/user/**",
+                        "/transaction/**",
                         "/tasks/search?text=book",
                         "/tasks/search",
                         "/tasks/**",//debugging
-                        "/webjars/**"
+                        "/webjars/**",
+                        "/api/notifications/**"
                 ).permitAll()
                 .and()
                 .sessionManagement()

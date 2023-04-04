@@ -1,10 +1,11 @@
 package com.example.hive.service.implementation;
 
-import com.example.hive.dto.Request.PayStackPaymentRequest;
+import com.example.hive.dto.request.PayStackPaymentRequest;
 import com.example.hive.dto.response.PayStackResponse;
 import com.example.hive.dto.response.VerifyTransactionResponse;
 import com.example.hive.entity.User;
 import com.example.hive.exceptions.CustomException;
+import com.example.hive.repository.UserRepository;
 import com.example.hive.service.EmailService;
 import com.example.hive.service.PayStackService;
 import com.example.hive.utils.AuthDetails;
@@ -13,12 +14,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.protocol.HTTP;
 import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +38,7 @@ import java.util.HashMap;
 @AllArgsConstructor
 @Service
 @NoArgsConstructor
+@Slf4j
 public class PayStackImpl implements PayStackService {
 
     @Value("${secret.key}")
@@ -48,10 +54,8 @@ public class PayStackImpl implements PayStackService {
     private AuthDetails authDetails;
     private EmailService emailService;
 
-//    @Autowired
-//    WalletService walletService;
 
-    private HashMap<String, String> paymentTracker;
+
 
     @Autowired
     public PayStackImpl(AuthDetails authDetails, EmailService emailService) {
@@ -75,8 +79,10 @@ public class PayStackImpl implements PayStackService {
             throw new CustomException("No authenticated user found");
         }
 
+
         try {
             Gson gson = new Gson();
+
             StringEntity postingString = new StringEntity(gson.toJson(request));
             HttpClient client = HttpClientBuilder.create().build();
             HttpPost post = new HttpPost(PAY_STACK_BASE_URL);
@@ -103,12 +109,8 @@ public class PayStackImpl implements PayStackService {
             throw new Exception("Failure initializing payStack transaction");
         }
 
-        if (paymentTracker == null) {
-            paymentTracker = new HashMap<>();
-        }
 
         String reference = initializeTransactionResponse.getData().getReference();
-        paymentTracker.put(reference, user.getEmail());
 
         emailService.sendEmail(EmailTemplates.createPaymentVerificationCodeMail(user, reference));
 
@@ -117,12 +119,6 @@ public class PayStackImpl implements PayStackService {
 
     @Override
     public VerifyTransactionResponse verifyPayment(String reference) {
-
-        String email = paymentTracker.get(reference);
-
-        if (email == null) {
-            throw new CustomException("Invalid payment reference");
-        }
 
         VerifyTransactionResponse payStackResponse;
         try {
@@ -145,12 +141,9 @@ public class PayStackImpl implements PayStackService {
             }
             ObjectMapper mapper = new ObjectMapper();
 
+
             payStackResponse = mapper.readValue(result.toString(), VerifyTransactionResponse.class);
 
-//            walletService.fundWallet(email, payStackResponse, "My new wallet",
-//                    "Wallet funded from payStack");
-
-            paymentTracker.remove(reference);
 
         } catch (Exception e) {
             throw new CustomException(e.getMessage());

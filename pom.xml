@@ -118,7 +118,13 @@
 			<artifactId>unirest-java</artifactId>
 			<version>3.14.2</version>
 		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+			<version>2.14.2</version>
+		</dependency>
 	</dependencies>
+
 
 	<build>
 		<plugins>
