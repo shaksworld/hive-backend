@@ -6,6 +6,8 @@ import com.example.hive.dto.response.AppResponse;
 import com.example.hive.dto.response.PayStackResponse;
 import com.example.hive.dto.response.VerifyTransactionResponse;
 import com.example.hive.service.PaymentService;
+import com.example.hive.dto.response.WalletResponseDto;
+import com.example.hive.service.WalletService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,6 +28,7 @@ import java.security.Principal;
 @RequiredArgsConstructor
 public class TransactionController {
     private final PaymentService paymentService;
+    private final WalletService walletService;
 
     @PostMapping("/payment")
     @Operation(summary = "Make Payment to Doer via Paystack Gateway", responses = {
@@ -49,6 +52,14 @@ public class TransactionController {
         VerifyTransactionResponse response = paymentService.verifyAndCompletePayment(reference, principal);
         return ResponseEntity.ok(AppResponse.buildSuccessTxn(response));
     }
+
+
+    public ResponseEntity<AppResponse<WalletResponseDto>> viewDoerWallet(Principal principal) throws Exception {
+
+        WalletResponseDto response = walletService.getWalletByUser(principal);
+        return ResponseEntity.ok(AppResponse.buildSuccessTxn(response));
+    }
+
 
 
 }

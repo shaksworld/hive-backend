@@ -25,6 +25,7 @@ public AppResponse<TaskResponseDto> createTask(TaskDto taskDto, User user, HttpS
 
     String applicationUrl(HttpServletRequest request);
 
+
     List<TaskResponseDto> searchTasksBy(String text, int pageNo,int pageSize,String sortBy,String sortDir);
 
     List<TaskResponseDto> getUserCompletedTasks(User currentUser);

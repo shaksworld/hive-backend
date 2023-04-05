@@ -2,7 +2,11 @@ package com.example.hive.service.implementation;
 
 import com.example.hive.constant.TransactionStatus;
 import com.example.hive.constant.TransactionType;
+<<<<<<< HEAD
 import com.example.hive.entity.Task;
+=======
+import com.example.hive.dto.response.WalletResponseDto;
+>>>>>>> d85187f5437ee9b8ce76df3d7912be2ab0c76a73
 import com.example.hive.entity.TransactionLog;
 import com.example.hive.entity.User;
 import com.example.hive.entity.Wallet;
@@ -13,13 +17,20 @@ import com.example.hive.repository.UserRepository;
 import com.example.hive.repository.WalletRepository;
 import com.example.hive.service.WalletService;
 import com.example.hive.utils.event.SuccessfulCreditEvent;
+<<<<<<< HEAD
 import com.example.hive.utils.event.WalletFundingEvent;
+=======
+>>>>>>> d85187f5437ee9b8ce76df3d7912be2ab0c76a73
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+<<<<<<< HEAD
+=======
+import java.security.Principal;
+>>>>>>> d85187f5437ee9b8ce76df3d7912be2ab0c76a73
 import java.util.UUID;
 
 @Log4j2
@@ -32,7 +43,11 @@ public class WalletServiceImpl implements WalletService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
+<<<<<<< HEAD
     public boolean creditDoerWallet(User doer, BigDecimal creditAmount, Task task){
+=======
+    public boolean creditDoerWallet(User doer, BigDecimal creditAmount){
+>>>>>>> d85187f5437ee9b8ce76df3d7912be2ab0c76a73
 
         log.info("Crediting doer wallet{}", doer.getFullName()) ;
         //check role of user
@@ -58,7 +73,10 @@ public class WalletServiceImpl implements WalletService {
 
             transactionLogRepository.save(transactionLog);
                 eventPublisher.publishEvent(new SuccessfulCreditEvent(doer, transactionLog));
+<<<<<<< HEAD
                 eventPublisher.publishEvent(new WalletFundingEvent(this, task));
+=======
+>>>>>>> d85187f5437ee9b8ce76df3d7912be2ab0c76a73
 
                 return true;
 
@@ -66,10 +84,21 @@ public class WalletServiceImpl implements WalletService {
 
     }
 
+<<<<<<< HEAD
 
 
 
 
+=======
+    @Override
+    public WalletResponseDto getWalletByUser(Principal principal) {
+
+        //get the user from the princial
+        User doer = userRepository.findByEmail(principal.getName()).get();
+        Wallet getWallet = walletRepository.findByUser(doer).orElseThrow(() -> new RuntimeException("Wallet not found"));
+        return new WalletResponseDto(getWallet.getAccountBalance());
+    }
+>>>>>>> d85187f5437ee9b8ce76df3d7912be2ab0c76a73
 
 
 }

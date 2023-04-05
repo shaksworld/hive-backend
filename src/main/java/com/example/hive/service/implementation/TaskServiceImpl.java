@@ -18,10 +18,10 @@ import com.example.hive.service.TaskService;
 import com.example.hive.utils.event.TaskAcceptedEvent;
 import com.example.hive.utils.event.listeners.TaskCreatedEvent;
 import lombok.AllArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import com.example.hive.service.WalletService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -253,6 +253,7 @@ public class TaskServiceImpl implements TaskService {
         if (task.getIsEscrowTransferComplete()){throw new BadRequestException("The task has been paid for ");}
 
         walletService.creditDoerWallet(doer, escrowWallet.getEscrowAmount(), task);
+
     }
 
     private boolean isTaskPendingApproval(Task tasK) {

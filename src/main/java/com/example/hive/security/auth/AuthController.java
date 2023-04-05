@@ -44,6 +44,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final EmailService emailService;
+
     private final UserRepository userRepository;
 
     @PostMapping("/login")
