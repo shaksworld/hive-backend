@@ -11,6 +11,8 @@ import com.example.hive.repository.UserRepository;
 import com.example.hive.repository.WalletRepository;
 import com.example.hive.service.PayStackService;
 import com.example.hive.service.PaymentService;
+import com.example.hive.dto.response.WalletResponseDto;
+import com.example.hive.service.WalletService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -38,6 +40,7 @@ public class TransactionController {
     private final PayStackService payStackServic;
     final String DEFAULT_PROVIDER = "paystack";
 
+    private final WalletService walletService;
 
     @PostMapping("/payment")
     @Operation(summary = "Make Payment to Doer via Paystack Gateway", responses = {
@@ -81,6 +84,14 @@ public class TransactionController {
        Wallet wallet = walletRepository.findByUser(user).orElseThrow(() -> new IllegalArgumentException("Wallet not found"));
         return wallet.getAccountBalance().compareTo(amount) > 0;
     }
+
+
+    public ResponseEntity<AppResponse<WalletResponseDto>> viewDoerWallet(Principal principal) throws Exception {
+
+        WalletResponseDto response = walletService.getWalletByUser(principal);
+        return ResponseEntity.ok(AppResponse.buildSuccessTxn(response));
+    }
+
 
 
 }
