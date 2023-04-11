@@ -15,8 +15,10 @@ import com.example.hive.repository.PaymentLogRepository;
 import com.example.hive.repository.TaskRepository;
 import com.example.hive.repository.UserRepository;
 import com.example.hive.service.TaskService;
+import com.example.hive.utils.event.TaskAcceptedEvent;
+import com.example.hive.utils.event.listeners.TaskCreatedEvent;
+import lombok.AllArgsConstructor;
 import com.example.hive.service.WalletService;
-import com.example.hive.utils.event.TaskCreatedEvent;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -49,7 +51,6 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public AppResponse<TaskResponseDto> createTask(TaskDto taskDto, User user, HttpServletRequest request) {
-
 //         Check if the user has the TASKER role
 
         if (!user.getRole().equals(Role.TASKER)) {
@@ -79,6 +80,7 @@ public class TaskServiceImpl implements TaskService {
                 .build();
 
         Task savedTask = taskRepository.save(task);
+
         paymentLog.setHasBeenUsedToCreateTask(true);
         escrowWallet.setTask(savedTask);
         escrowWalletRepository.save(escrowWallet);
@@ -169,6 +171,7 @@ public class TaskServiceImpl implements TaskService {
                 .build();
     }
 
+
     public String applicationUrl(HttpServletRequest request) {
         return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
@@ -199,8 +202,10 @@ public class TaskServiceImpl implements TaskService {
             tasKToUpdate.setDoer(user);
             tasKToUpdate.setStatus(Status.ONGOING);
             Task updatedTask = taskRepository.save(tasKToUpdate);
+            eventPublisher.publishEvent(new TaskAcceptedEvent(user, updatedTask));
             return modelMapper.map(updatedTask, TaskResponseDto.class);
         }
+
         throw new CustomException("Task not available", HttpStatus.BAD_REQUEST);
     }
 
@@ -247,7 +252,8 @@ public class TaskServiceImpl implements TaskService {
 
         if (task.getIsEscrowTransferComplete()){throw new BadRequestException("The task has been paid for ");}
 
-        walletService.creditDoerWallet(doer, escrowWallet.getEscrowAmount());
+        walletService.creditDoerWallet(doer, escrowWallet.getEscrowAmount(), task);
+
     }
 
     private boolean isTaskPendingApproval(Task tasK) {

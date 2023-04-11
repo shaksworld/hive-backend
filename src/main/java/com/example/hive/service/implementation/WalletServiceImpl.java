@@ -2,6 +2,7 @@ package com.example.hive.service.implementation;
 
 import com.example.hive.constant.TransactionStatus;
 import com.example.hive.constant.TransactionType;
+import com.example.hive.entity.Task;
 import com.example.hive.dto.response.WalletResponseDto;
 import com.example.hive.entity.TransactionLog;
 import com.example.hive.entity.User;
@@ -13,6 +14,7 @@ import com.example.hive.repository.UserRepository;
 import com.example.hive.repository.WalletRepository;
 import com.example.hive.service.WalletService;
 import com.example.hive.utils.event.SuccessfulCreditEvent;
+import com.example.hive.utils.event.WalletFundingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
@@ -32,7 +34,7 @@ public class WalletServiceImpl implements WalletService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    public boolean creditDoerWallet(User doer, BigDecimal creditAmount){
+    public boolean creditDoerWallet(User doer, BigDecimal creditAmount, Task task){
 
         log.info("Crediting doer wallet{}", doer.getFullName()) ;
         //check role of user
@@ -58,6 +60,7 @@ public class WalletServiceImpl implements WalletService {
 
             transactionLogRepository.save(transactionLog);
                 eventPublisher.publishEvent(new SuccessfulCreditEvent(doer, transactionLog));
+                eventPublisher.publishEvent(new WalletFundingEvent(this, task));
 
                 return true;
 

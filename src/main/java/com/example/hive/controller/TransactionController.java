@@ -5,8 +5,8 @@ import com.example.hive.dto.request.TaskerPaymentRequest;
 import com.example.hive.dto.response.AppResponse;
 import com.example.hive.dto.response.PayStackResponse;
 import com.example.hive.dto.response.VerifyTransactionResponse;
-import com.example.hive.dto.response.WalletResponseDto;
 import com.example.hive.service.PaymentService;
+import com.example.hive.dto.response.WalletResponseDto;
 import com.example.hive.service.WalletService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -52,6 +52,7 @@ public class TransactionController {
         VerifyTransactionResponse response = paymentService.verifyAndCompletePayment(reference, principal);
         return ResponseEntity.ok(AppResponse.buildSuccessTxn(response));
     }
+
 
     public ResponseEntity<AppResponse<WalletResponseDto>> viewDoerWallet(Principal principal) throws Exception {
 
