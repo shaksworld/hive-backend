@@ -35,7 +35,6 @@ public class TaskController {
     }
 
     @PostMapping("/")
-//    @PreAuthorize("hasRole('TASKER')")
     public ResponseEntity<AppResponse<TaskResponseDto>> createTask(@Valid @RequestBody TaskDto taskDto, Principal principal,HttpServletRequest request) {
         String email = principal.getName();
         User currentUser = userRepository.findByEmail(email)

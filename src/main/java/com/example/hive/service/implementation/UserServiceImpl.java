@@ -152,9 +152,6 @@ public class UserServiceImpl implements UserService {
     private User saveNewUser(UserRegistrationRequestDto registrationRequestDto) {
         User newUser = new User();
         Role role = registrationRequestDto.getRole();
-        Address address = registrationRequestDto.getAddress();
-        addressRepository.save(address);
-
         BeanUtils.copyProperties(registrationRequestDto, newUser);
         log.info("user has a role of {}",registrationRequestDto.getRole().toString());
         newUser.addRole(role);
