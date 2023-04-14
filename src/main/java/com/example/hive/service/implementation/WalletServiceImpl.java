@@ -103,6 +103,7 @@ public class WalletServiceImpl implements WalletService {
             transactionLog.setTransactionStatus(TransactionStatus.SUCCESS);
 
             transactionLogRepository.save(transactionLog);
+            walletRepository.save(wallet);
             eventPublisher.publishEvent(new SuccessfulCreditEvent(tasker, transactionLog));
 
             return true;

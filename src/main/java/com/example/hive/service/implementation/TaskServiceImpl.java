@@ -20,6 +20,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -245,7 +246,44 @@ public class TaskServiceImpl implements TaskService {
     public List<TaskResponseDto> getTasksByTaskerAndStatus(User currentUser, String status) {
      List<Task>  tasks = taskRepository.findAllByTaskerAndStatus(currentUser,Status.valueOf(status.toUpperCase()));
 
-        return tasks.stream().map(task -> modelMapper.map(task, TaskResponseDto.class)).collect(Collectors.toList());
+        return tasks.stream().map(this::mapToDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean cancelNewTaskByTasker(User currentUser, String taskId) {
+        Task taskToCancel = taskRepository.findById(UUID.fromString(taskId)).orElseThrow(() -> new ResourceNotFoundException("task can not be found"));
+
+        if (taskToCancel.getStatus().equals(Status.CANCELLED)) throw new BadRequestException("Task is already cancelled");
+        if (!taskToCancel.getStatus().equals(Status.NEW)) throw new BadRequestException("Task is not new");
+        if ((taskToCancel.getStatus().equals(Status.NEW)) && isTaskerTheOwnerOfTask(taskToCancel,currentUser)) {
+            refundTasker(taskToCancel);
+            taskToCancel.setStatus(Status.CANCELLED);
+            taskRepository.save(taskToCancel);
+            return true;
+        }
+        return false;
+    }
+
+    @Scheduled(cron = "0 */5 * * * *") // Runs every 5 minutes
+    public void checkTaskExpiry() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Task> expiredTasks = taskRepository.findAllByTaskDurationLessThanAndStatus(now, Status.NEW);
+        // Process the expired tasks by changing status and refunding the tasker
+        expiredTasks.forEach(task -> {
+            task.setStatus(Status.EXPIRED);
+            taskRepository.save(task);
+            refundTasker(task);
+        });
+
+    }
+
+    private void refundTasker(Task task) {
+        User tasker = task.getTasker();
+        EscrowWallet escrowWallet = task.getEscrowWallet();
+        walletService.fundTaskerWallet(tasker, escrowWallet.getEscrowAmount());
+        escrowWallet.setEscrowAmount(new BigDecimal(0));
+        escrowWalletRepository.save(escrowWallet);
+
     }
 
     private void creditTheDoerWalletFromEscrowWallet(EscrowWallet escrowWallet, User doer, Task task) {
