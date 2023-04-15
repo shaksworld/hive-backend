@@ -2,13 +2,11 @@ package com.example.hive.service.implementation;
 
 import com.example.hive.constant.TransactionStatus;
 import com.example.hive.constant.TransactionType;
-import com.example.hive.entity.Task;
+import com.example.hive.entity.*;
 import com.example.hive.dto.response.WalletResponseDto;
-import com.example.hive.entity.TransactionLog;
-import com.example.hive.entity.User;
-import com.example.hive.entity.Wallet;
 import com.example.hive.enums.Role;
 import com.example.hive.exceptions.CustomException;
+import com.example.hive.repository.EscrowWalletRepository;
 import com.example.hive.repository.TransactionLogRepository;
 import com.example.hive.repository.UserRepository;
 import com.example.hive.repository.WalletRepository;
@@ -32,6 +30,8 @@ public class WalletServiceImpl implements WalletService {
     private final WalletRepository walletRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
+
+    private final EscrowWalletRepository escrowWalletRepository;
 
     @Override
     public boolean creditDoerWallet(User doer, BigDecimal creditAmount, Task task){
@@ -135,5 +135,15 @@ public class WalletServiceImpl implements WalletService {
         }
     }
 
-
+    @Override
+    public boolean refundTaskerFromEscrowWallet(Task task) {
+        User tasker = task.getTasker();
+        EscrowWallet escrowWallet = task.getEscrowWallet();
+       if ( fundTaskerWallet(tasker, escrowWallet.getEscrowAmount())){
+           escrowWallet.setEscrowAmount(new BigDecimal(0));
+           escrowWalletRepository.save(escrowWallet);
+           return true;
+    }
+        return false;
+    }
 }

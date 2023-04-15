@@ -18,4 +18,6 @@ public interface WalletService {
     boolean fundTaskerWallet(User tasker, BigDecimal amountToFund);
 
     boolean debitTaskerWalletToEscrow(Wallet wallet, BigDecimal amount);
+
+    boolean refundTaskerFromEscrowWallet(Task taskToCancel);
 }

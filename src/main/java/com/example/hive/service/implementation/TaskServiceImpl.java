@@ -20,7 +20,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -256,6 +255,7 @@ public class TaskServiceImpl implements TaskService {
         if (taskToCancel.getStatus().equals(Status.CANCELLED)) throw new BadRequestException("Task is already cancelled");
         if (!taskToCancel.getStatus().equals(Status.NEW)) throw new BadRequestException("Task is not new");
         if ((taskToCancel.getStatus().equals(Status.NEW)) && isTaskerTheOwnerOfTask(taskToCancel,currentUser)) {
+            walletService.refundTaskerFromEscrowWallet(taskToCancel);
             refundTasker(taskToCancel);
             taskToCancel.setStatus(Status.CANCELLED);
             taskRepository.save(taskToCancel);
@@ -264,18 +264,6 @@ public class TaskServiceImpl implements TaskService {
         return false;
     }
 
-    @Scheduled(cron = "0 */5 * * * *") // Runs every 5 minutes
-    public void checkTaskExpiry() {
-        LocalDateTime now = LocalDateTime.now();
-        List<Task> expiredTasks = taskRepository.findAllByTaskDurationLessThanAndStatus(now, Status.NEW);
-        // Process the expired tasks by changing status and refunding the tasker
-        expiredTasks.forEach(task -> {
-            task.setStatus(Status.EXPIRED);
-            taskRepository.save(task);
-            refundTasker(task);
-        });
-
-    }
 
     private void refundTasker(Task task) {
         User tasker = task.getTasker();
