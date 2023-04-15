@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,5 +32,11 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
 
     @Query("SELECT t FROM Task t WHERE t.doer = :doer AND t.status = 'COMPLETED'")
     List<Task> findCompletedTasksByDoer(@Param("doer") User doer);
+
+    List<Task> findAllByTaskerAndStatus(User currentUser, Status valueOf);
+
+    List<Task> findAllByTaskDurationLessThanAndStatus(LocalDateTime now, Status status);
+
+
 }
 
