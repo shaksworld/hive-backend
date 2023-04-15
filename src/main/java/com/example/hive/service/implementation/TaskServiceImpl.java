@@ -280,7 +280,7 @@ public class TaskServiceImpl implements TaskService {
 
         if (task.getIsEscrowTransferComplete()){throw new BadRequestException("The task has been paid for ");}
 
-        walletService.creditDoerWallet(doer, escrowWallet.getEscrowAmount(), task);
+        walletService.creditDoerWallet(doer, escrowWallet.getEscrowAmount());
 
     }
 

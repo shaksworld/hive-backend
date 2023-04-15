@@ -15,7 +15,7 @@ public interface WalletService {
 
     //TODO :make sure the withrawal code has new a new transaction log with set time(when the withdrawal is made
 
-    boolean creditDoerWallet(User doer, BigDecimal creditAmount, Task task);
+    boolean creditDoerWallet(User doer, BigDecimal creditAmount);
 
     WalletResponseDto getWalletByUser(Principal principal);
 
