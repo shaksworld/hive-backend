@@ -2,10 +2,12 @@ package com.example.hive.service.implementation;
 
 import com.example.hive.constant.TransactionStatus;
 import com.example.hive.constant.TransactionType;
+import com.example.hive.dto.response.TransactionResponse;
 import com.example.hive.entity.*;
 import com.example.hive.dto.response.WalletResponseDto;
 import com.example.hive.enums.Role;
 import com.example.hive.exceptions.CustomException;
+import com.example.hive.exceptions.ResourceNotFoundException;
 import com.example.hive.repository.EscrowWalletRepository;
 import com.example.hive.repository.TransactionLogRepository;
 import com.example.hive.repository.UserRepository;
@@ -15,12 +17,16 @@ import com.example.hive.utils.event.SuccessfulCreditEvent;
 import com.example.hive.utils.event.WalletFundingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.security.Principal;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Log4j2
 @Service
@@ -32,6 +38,8 @@ public class WalletServiceImpl implements WalletService {
     private final ApplicationEventPublisher eventPublisher;
 
     private final EscrowWalletRepository escrowWalletRepository;
+
+    private final ModelMapper modelMapper;
 
     @Override
     public boolean creditDoerWallet(User doer, BigDecimal creditAmount, Task task){
@@ -57,6 +65,7 @@ public class WalletServiceImpl implements WalletService {
             transactionLog.setUser(doer);
             transactionLog.setTransactionType(TransactionType.DEPOSIT);
             transactionLog.setTransactionStatus(TransactionStatus.SUCCESS);
+            transactionLog.setTransactionDate(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(LocalDateTime.now()));
 
             transactionLogRepository.save(transactionLog);
                 eventPublisher.publishEvent(new SuccessfulCreditEvent(doer, transactionLog));
@@ -101,6 +110,7 @@ public class WalletServiceImpl implements WalletService {
             transactionLog.setUser(tasker);
             transactionLog.setTransactionType(TransactionType.DEPOSIT);
             transactionLog.setTransactionStatus(TransactionStatus.SUCCESS);
+            transactionLog.setTransactionDate(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(LocalDateTime.now()));
 
             transactionLogRepository.save(transactionLog);
             walletRepository.save(wallet);
@@ -145,5 +155,12 @@ public class WalletServiceImpl implements WalletService {
            return true;
     }
         return false;
+    }
+
+    @Override
+    public List<TransactionResponse> getWalletHistory(Principal principal) {
+        User user = userRepository.findByEmail(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        List<TransactionLog> transactionLogs = transactionLogRepository.findAllByUserAndTransactionStatus(user, TransactionStatus.SUCCESS);
+        return transactionLogs.stream().map(transactionLog -> modelMapper.map(transactionLog, TransactionResponse.class)).collect(Collectors.toList());
     }
 }
