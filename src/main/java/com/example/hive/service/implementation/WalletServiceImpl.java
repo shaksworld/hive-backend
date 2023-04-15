@@ -42,7 +42,7 @@ public class WalletServiceImpl implements WalletService {
     private final ModelMapper modelMapper;
 
     @Override
-    public boolean creditDoerWallet(User doer, BigDecimal creditAmount, Task task){
+    public boolean creditDoerWallet(User doer, BigDecimal creditAmount){
 
         log.info("Crediting doer wallet{}", doer.getFullName()) ;
         //check role of user
@@ -69,7 +69,7 @@ public class WalletServiceImpl implements WalletService {
 
             transactionLogRepository.save(transactionLog);
                 eventPublisher.publishEvent(new SuccessfulCreditEvent(doer, transactionLog));
-                eventPublisher.publishEvent(new WalletFundingEvent(this, task));
+                eventPublisher.publishEvent(new WalletFundingEvent(this, doer, creditAmount));
 
                 return true;
 
@@ -115,7 +115,7 @@ public class WalletServiceImpl implements WalletService {
             transactionLogRepository.save(transactionLog);
             walletRepository.save(wallet);
             eventPublisher.publishEvent(new SuccessfulCreditEvent(tasker, transactionLog));
-
+            eventPublisher.publishEvent(new WalletFundingEvent(this, tasker, amountToFund));
             return true;
 
         }
