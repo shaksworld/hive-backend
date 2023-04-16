@@ -8,3 +8,4 @@ COPY --from=build /home/app/target/hive.jar /usr/local/lib/hive.jar
 EXPOSE 5000
 #ADD target/hive.jar hive.jar
 ENTRYPOINT ["java","-Xmx512m","-jar","/usr/local/lib/hive.jar"]
+CMD ["tail", "-f", "/dev/null"]
