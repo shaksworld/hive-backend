@@ -47,6 +47,6 @@ public class UserRegistrationRequestDto {
     private String validId;
 
     //    @NotBlank(message = "address field cannot be null")
-    private Address address;
+    private String address;
 
 }
