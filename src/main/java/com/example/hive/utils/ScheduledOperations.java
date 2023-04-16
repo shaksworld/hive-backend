@@ -9,6 +9,7 @@ import com.example.hive.service.PaymentService;
 import com.example.hive.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -58,7 +59,7 @@ public class ScheduledOperations {
             try {
                 paymentService.verifyAndCompletePayment(paymentLog.getTransactionReference());
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                log.info("Transaction verification failed for transaction reference: " + paymentLog.getTransactionReference());
             }
         }
         );

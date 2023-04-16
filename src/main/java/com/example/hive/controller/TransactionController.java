@@ -27,6 +27,7 @@ import java.util.List;
 @RequestMapping("/transaction")
 @Slf4j
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class TransactionController {
     private final UserRepository userRepository;
     private final TransactionLogRepository transactionLogRepository;
