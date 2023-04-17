@@ -242,9 +242,14 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskResponseDto> getTasksByTaskerAndStatus(User currentUser, String status) {
-     List<Task>  tasks = taskRepository.findAllByTaskerAndStatus(currentUser,Status.valueOf(status.toUpperCase()));
+    public List<TaskResponseDto> getTasksByUserRoleAndStatus(User currentUser, String status) {
 
+        List<Task> tasks;
+        if (currentUser.getRole().equals(Role.DOER)) {
+            tasks = taskRepository.findAllByDoerAndStatus(currentUser, Status.valueOf(status.toUpperCase()));
+        } else{
+            tasks = taskRepository.findAllByTaskerAndStatus(currentUser, Status.valueOf(status.toUpperCase()));
+        }
         return tasks.stream().map(this::mapToDto).collect(Collectors.toList());
     }
 
