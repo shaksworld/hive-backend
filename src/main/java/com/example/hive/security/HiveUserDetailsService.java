@@ -18,7 +18,6 @@ import java.util.Collections;
 @Log4j2
 @RequiredArgsConstructor
 public class HiveUserDetailsService implements UserDetailsService {
-
     private final UserRepository userRepository;
 
     @Override
@@ -36,3 +35,4 @@ public class HiveUserDetailsService implements UserDetailsService {
 
     }
 }
+

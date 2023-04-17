@@ -2,8 +2,8 @@ package com.example.hive.utils;
 
 import com.example.hive.dto.request.EmailDto;
 import com.example.hive.entity.Task;
-import com.example.hive.entity.User;
 
+import com.example.hive.entity.User;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -12,7 +12,7 @@ public class EmailTemplates {
 
     private static final String senderCredential = "hive@blessingchuks.tech";
 
-    public static EmailDto createVerificationEmail(User recipient,String token, String eventUrl) {
+    public static EmailDto createVerificationEmail(User recipient, String token, String eventUrl) {
         String verificationUrl = eventUrl
                 + "/verifyRegistration?token="
                 + token;

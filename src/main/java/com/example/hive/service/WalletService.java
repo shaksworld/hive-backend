@@ -13,11 +13,13 @@ import java.util.List;
 
 public interface WalletService {
 
-    //TODO :make sure the withrawal code has new a new transaction log with set time(when the withdrawal is made
+
 
     boolean creditDoerWallet(User doer, BigDecimal creditAmount);
 
     WalletResponseDto getWalletByUser(Principal principal);
+
+    void withdrawFromWalletBalance(User user, BigDecimal amount);
 
     boolean fundTaskerWallet(User tasker, BigDecimal amountToFund);
 

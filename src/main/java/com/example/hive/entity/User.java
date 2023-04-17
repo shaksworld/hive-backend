@@ -34,7 +34,7 @@ public class User extends AuditEntity {
     @OneToMany(targetEntity = Task.class, fetch = FetchType.EAGER)
     private List<Task> task;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     private Wallet wallet;
 
 

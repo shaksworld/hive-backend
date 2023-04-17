@@ -1,5 +1,6 @@
 package com.example.hive.security.auth;
 
+
 import com.example.hive.dto.request.UserRegistrationRequestDto;
 import com.example.hive.dto.response.AppResponse;
 import com.example.hive.dto.response.UserRegistrationResponseDto;
@@ -64,7 +65,7 @@ public class AuthController {
     }
 
     @PostMapping(path = "/register")
-    public ResponseEntity<AppResponse<?>> registerUser(@RequestBody @Valid UserRegistrationRequestDto registrationRequestDto,HttpServletRequest request) {
+    public ResponseEntity<AppResponse<?>> registerUser(@RequestBody @Valid UserRegistrationRequestDto registrationRequestDto, HttpServletRequest request) {
         log.info("controller register: register user :: [{}] ::", registrationRequestDto.getEmail());
         validateUserRegistration(registrationRequestDto);
         UserRegistrationResponseDto response = userService.registerUser(registrationRequestDto, request);
