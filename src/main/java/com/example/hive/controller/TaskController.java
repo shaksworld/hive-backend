@@ -192,13 +192,13 @@ public class TaskController {
     }
 
 
-    @GetMapping("/tasker/")
-    public ResponseEntity<AppResponse<Object>> getAllTasksByTaskerAndStatus(Principal principal, @RequestParam(value = "status") String status) {
+    @GetMapping("/fetchTasks/")
+    public ResponseEntity<AppResponse<Object>> getAllTasksByUserRoleAndStatus(Principal principal, @RequestParam(value = "status") String status) {
         try {
             String email = principal.getName();
             User currentUser = userRepository.findByEmail(email)
                     .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-            List<TaskResponseDto> tasks = taskService.getTasksByTaskerAndStatus(currentUser,status);
+            List<TaskResponseDto> tasks = taskService.getTasksByUserRoleAndStatus(currentUser,status);
             AppResponse<Object> appResponse = AppResponse.builder()
                     .statusCode(ResponseStatus.SUCCESSFUL.getCode())
                     .result(tasks)

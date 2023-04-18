@@ -1,21 +1,27 @@
 package com.example.hive.service.implementation;
 
+import com.example.hive.client.PayStackClient;
+import com.example.hive.dto.request.BankTransferDto;
 import com.example.hive.dto.request.PayStackPaymentRequest;
-import com.example.hive.dto.response.PayStackResponse;
-import com.example.hive.dto.response.VerifyTransactionResponse;
+import com.example.hive.dto.request.PayStackTransferRecepientRequest;
+import com.example.hive.dto.request.PayStackTransferRequest;
+import com.example.hive.dto.response.*;
 import com.example.hive.entity.User;
 import com.example.hive.exceptions.CustomException;
 import com.example.hive.repository.UserRepository;
 import com.example.hive.service.EmailService;
 import com.example.hive.service.PayStackService;
+import com.example.hive.service.WalletService;
 import com.example.hive.utils.AuthDetails;
 import com.example.hive.utils.EmailTemplates;
+import com.example.hive.utils.TransactionUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpEntity;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -29,39 +35,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.security.Principal;
-import java.util.HashMap;
+import java.time.Duration;
+import java.util.List;
 
-@AllArgsConstructor
+
 @Service
-@NoArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class PayStackImpl implements PayStackService {
 
     @Value("${secret.key}")
-    private String PAY_STACK_SECRET_KEY;
-
-
+    private  String PAY_STACK_SECRET_KEY;
     @Value("${paystack.url}")
-    private String PAY_STACK_BASE_URL;
-
+    private  String PAY_STACK_BASE_URL;
     @Value("${paystack.verification.url}")
-    private String PAY_STACK_VERIFY_URL;
+    private  String PAY_STACK_VERIFY_URL;
+    private final AuthDetails authDetails;
+    private final EmailService emailService;
+    private final PayStackClient payStack;
+    private final WalletService walletService;
+    private final Gson gson;
 
-    private AuthDetails authDetails;
-    private EmailService emailService;
-
-
-
-
-    @Autowired
-    public PayStackImpl(AuthDetails authDetails, EmailService emailService) {
-        this.authDetails = authDetails;
-        this.emailService = emailService;
-    }
 
     @Override
     public PayStackResponse initTransaction(Principal principal, PayStackPaymentRequest request) throws Exception {
@@ -79,10 +79,8 @@ public class PayStackImpl implements PayStackService {
             throw new CustomException("No authenticated user found");
         }
 
-
         try {
             Gson gson = new Gson();
-
             StringEntity postingString = new StringEntity(gson.toJson(request));
             HttpClient client = HttpClientBuilder.create().build();
             HttpPost post = new HttpPost(PAY_STACK_BASE_URL);
@@ -109,8 +107,8 @@ public class PayStackImpl implements PayStackService {
             throw new Exception("Failure initializing payStack transaction");
         }
 
-
         String reference = initializeTransactionResponse.getData().getReference();
+
 
         emailService.sendEmail(EmailTemplates.createPaymentVerificationCodeMail(user, reference));
 
@@ -151,4 +149,72 @@ public class PayStackImpl implements PayStackService {
         return payStackResponse;
     }
 
+    @Override
+    public List<ListBanksResponse> fetchBanks(String provider) {
+        return switch (provider.toLowerCase()) {
+            case "paystack" -> getListBanksResponses(payStack.listBanks());
+            default -> throw new IllegalArgumentException("Invalid provider");
+        };
+    }
+    private List<ListBanksResponse> getListBanksResponses(TransactionResponse response) {
+        return gson.fromJson(gson.toJson(response.getData()), new TypeToken<List<ListBanksResponse>>() {
+        }.getType());
+    }
+    @Override
+    public Mono<TransactionResponse> transferFunds(BankTransferDto dto, String provider, User user) throws InterruptedException {
+
+        Flux<TransactionResponse> responseFlux;
+
+        try {
+            switch (provider.toLowerCase()) {
+                case "paystack" -> {
+                    PayStackTransferRequest req = buildPayStackTransferRequest(dto, getRecipientCode(dto));
+                    log.info("PayStack Transfer req: {}", req);
+                    responseFlux = payStack.transferFunds(req, "Bearer " + PAY_STACK_SECRET_KEY);
+                }
+
+                default -> throw new IllegalArgumentException("Invalid provider");
+            }
+        } catch (Exception e) {
+            throw new CustomException(e.getMessage());}
+
+        walletService.withdrawFromWalletBalance(user, dto.getAmount());
+
+        return responseFlux.doOnNext(res -> log.info("res: {}", res))
+                    .next();
+
+    }
+
+    private String getRecipientCode(BankTransferDto dto) {
+
+        PayStackTransferRecepientRequest recipientRequest = PayStackTransferRecepientRequest.builder()
+                .accountNumber(dto.getBeneficiaryAccountNumber())
+                .bankCode(dto.getBeneficiaryBankCode())
+                .type("nuban")
+                .build();
+
+        Object recipient = payStack.createTransferRecipient(recipientRequest);
+
+        var data = gson.fromJson(gson.toJson(recipient), JsonObject.class).get("data");
+
+        return data.getAsJsonObject().get("recipient_code").getAsString();
+    }
+    private PayStackTransferRequest buildPayStackTransferRequest(BankTransferDto dto, String recipientCode) {
+       String test = "";
+        return PayStackTransferRequest.builder()
+                .source("balance")
+                .amount(dto.getAmount())
+                .recipient(recipientCode)
+                .reason(dto.getNarration())
+                .reference(StringUtils.isBlank(dto.getTransactionReference()) ? TransactionUtil.generateUniqueRef() : dto.getTransactionReference())
+                .build();
+    }
+
+
+
+
 }
+
+
+
+

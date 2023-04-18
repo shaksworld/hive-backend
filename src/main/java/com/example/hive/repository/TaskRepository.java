@@ -37,6 +37,6 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
 
     List<Task> findAllByTaskDurationLessThanAndStatus(LocalDateTime now, Status status);
 
-
+    List<Task> findAllByDoerAndStatus(User currentUser, Status valueOf);
 }
 
