@@ -115,6 +115,51 @@ public class PaymentServiceImpl implements PaymentService {
 
     }
 
+    @Override
+    @Transactional
+    public VerifyTransactionResponse verifyAndCompletePayment(String reference) throws Exception {
+
+
+        //check status of transaction first
+        PaymentLog paymentLog = paymentLogRepository.findByTransactionReference(reference).orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
+
+        if (paymentLog.getTransactionStatus() == TransactionStatus.SUCCESS){
+            throw new CustomException("Payment has been completed and verified ");
+        }
+
+        VerifyTransactionResponse verifyTransactionResponse = null;
+        try {
+            verifyTransactionResponse = payStackService.verifyPayment(reference);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        log.info("Verified transaction response {}", verifyTransactionResponse.getData().getAmount());
+
+        var status = verifyTransactionResponse.getData().getStatus();
+        var amountPaid = BigDecimal.valueOf(verifyTransactionResponse.getData().getAmount());
+        var amountToFund = paymentLog.getAmount();
+
+        if (status.equals("failed")){
+            paymentLog.setTransactionStatus(TransactionStatus.FAILED);
+            return verifyTransactionResponse;
+        }
+
+
+        if (status.equals("success")) {
+
+            if (!(amountPaid.compareTo(amountToFund)==0)){ throw new BadRequestException("Invalid amount was paid for");}
+            verifyTransactionResponse.setPaymentLogId(paymentLog.getPaymentLogId());
+            paymentLog.setTransactionStatus(TransactionStatus.SUCCESS);
+            paymentLogRepository.save(paymentLog);
+
+            walletService.fundTaskerWallet(paymentLog.getTaskerDepositor(), amountToFund);
+        } else {
+            throw new CustomException("Transaction failed");
+        }
+
+        return verifyTransactionResponse;
+
+    }
     private User verifyAndGetTasker(Principal principal) {
         User user = userRepository.findByEmail(principal.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 

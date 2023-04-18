@@ -2,7 +2,6 @@ package com.example.hive.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.google.gson.JsonObject;
 import lombok.*;
 import org.springframework.stereotype.Component;
 

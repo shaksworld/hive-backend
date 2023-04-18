@@ -10,11 +10,10 @@ import java.util.List;
 import java.util.UUID;
 
 public interface TaskService {
-//    AppResponse<TaskResponseDto> createTask(TaskDto taskDto, HttpServletRequest request);
+
 public AppResponse<TaskResponseDto> createTask(TaskDto taskDto, User user, HttpServletRequest request);
     public AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto, Principal principal);
-//    ApiResponse<TaskDto> updateTask(TaskDto taskDto);
-//AppResponse<TaskResponseDto> updateTask(UUID taskId, TaskDto taskDto);
+
 
     List<TaskResponseDto> findAll(int pageNo,int pageSize,String sortBy,String sortDir);
 
@@ -37,7 +36,7 @@ public AppResponse<TaskResponseDto> createTask(TaskDto taskDto, User user, HttpS
 
     TaskResponseDto taskerApprovesCompletedTask(User currentUser, String taskId);
 
-    List<TaskResponseDto> getTasksByTaskerAndStatus(User currentUser, String status);
+    List<TaskResponseDto> getTasksByUserRoleAndStatus(User currentUser, String status);
 
     boolean cancelNewTaskByTasker(User currentUser, String taskId);
 }

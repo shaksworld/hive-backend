@@ -27,10 +27,10 @@ public class HiveApplicationConfig {
 
     private final UserDetailsService userDetailsService;
 
-
     public HiveApplicationConfig(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
