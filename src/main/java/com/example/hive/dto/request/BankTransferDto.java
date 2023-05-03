@@ -13,17 +13,25 @@ public class BankTransferDto {
 
     @Positive
     private  BigDecimal amount;
+
     @NotEmpty
     private  String currencyCode;
+
     @NotEmpty
     private  String narration;
+
     @NotEmpty
     private  String beneficiaryAccountNumber;
+
     String beneficiaryAccountName;
+
     @NotEmpty
     private  String beneficiaryBankCode;
+
     String transactionReference;
+
     int maxRetryAttempt = 0;
+
     String callBackUrl;
 
 }
